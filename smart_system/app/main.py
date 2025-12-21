@@ -6,7 +6,7 @@ from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-
+from sqlalchemy import select
 app = FastAPI(title="Military Journal")
 engine = create_async_engine('sqlite+aiosqlite:///books.db', echo=True)
 
@@ -46,6 +46,12 @@ async def books_alchemy(data: BookAddSchema, session : SessionDep):
     session.add(new_book)
     await session.commit()
     return {"success": True}
+
+@app.get("/booksAlchemy")
+async def get_books_alchemy(session : SessionDep):
+    query = select(BookModel)
+    result = await session.execute(query)
+    return result.scalars().all()
 
 books = [
     {
