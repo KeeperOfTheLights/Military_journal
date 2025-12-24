@@ -11,14 +11,12 @@ from sqlalchemy.orm import DeclarativeBase
 load_dotenv()
 
 DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "sqlite+aiosqlite:///books.db"  # fallback
-).replace(
-    "postgresql://", "postgresql+asyncpg://")
+    "DATABASE_URL" # fallback
+)
 
 engine = create_async_engine(
     DATABASE_URL,
-    echo=True,
+    echo=True, #  set False in production
 )
 
 async_session = async_sessionmaker(

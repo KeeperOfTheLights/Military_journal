@@ -1,15 +1,23 @@
 import uvicorn
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import text
 
 from backend.src.api.dependencies import SessionDep
-from backend.src.database import Base, engine
+from backend.src.database import Base, engine, get_db
 from backend.src.models.books import BookModel, Book
 from backend.src.schemas.books import BookAddSchema, UserAgeSchema
 
 router = APIRouter()
 
 users = []
+
+@router.get("/db-check")
+async def db_check(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(text("SELECT 1"))
+    print(engine.url)
+    return {"database": "connected", "result": result.scalar()}
 
 @router.post("/setup_database")
 async def setup_db():
