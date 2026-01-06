@@ -65,6 +65,28 @@ async def health_check():
     return {"status": "healthy"}
 
 
+@app.get("/debug/token")
+async def debug_token(authorization: str = None):
+    """Debug endpoint to test token decoding."""
+    from backend.src.security import decode_access_token
+    
+    if not authorization:
+        return {"error": "No authorization header"}
+    
+    # Extract token from "Bearer <token>"
+    parts = authorization.split()
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        return {"error": "Invalid authorization format", "received": authorization[:50]}
+    
+    token = parts[1]
+    payload = decode_access_token(token)
+    
+    if payload is None:
+        return {"error": "Failed to decode token", "token_preview": token[:50] + "..."}
+    
+    return {"success": True, "payload": payload}
+
+
 @app.get("/database-info")
 async def database_info():
     """Get information about the database being used."""

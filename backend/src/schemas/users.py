@@ -11,6 +11,15 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     role: UserRole = UserRole.STUDENT
+    
+    # Profile fields
+    first_name: str
+    last_name: str
+    middle_name: Optional[str] = None
+    phone: Optional[str] = None
+    
+    # Student-specific (required if role is student)
+    group_id: Optional[int] = None
 
     @field_validator('password')
     @classmethod
