@@ -1,0 +1,70 @@
+from datetime import datetime, date
+from pydantic import BaseModel, field_validator
+from typing import Optional
+
+from backend.src.models.disciplinary import ViolationType, SeverityLevel
+from backend.src.schemas.students import StudentRead
+from backend.src.schemas.teachers import TeacherRead
+
+
+class DisciplinaryCreate(BaseModel):
+    """Schema for creating a new disciplinary record."""
+    student_id: int
+    reported_by_id: int
+    violation_type: ViolationType
+    severity: SeverityLevel
+    date: date
+    description: str
+    action_taken: Optional[str] = None
+
+    @field_validator('description')
+    @classmethod
+    def validate_description(cls, v: str) -> str:
+        v = v.strip()
+        if len(v) < 10:
+            raise ValueError('Description must be at least 10 characters')
+        return v
+
+
+class DisciplinaryRead(BaseModel):
+    """Schema for reading disciplinary record information."""
+    id: int
+    student_id: int
+    reported_by_id: int
+    violation_type: ViolationType
+    severity: SeverityLevel
+    date: date
+    description: str
+    action_taken: Optional[str]
+    report_number: Optional[str]
+    is_resolved: bool
+    resolved_date: Optional[date]
+    resolution_notes: Optional[str]
+    created_at: datetime
+    updated_at: datetime
+
+    # Nested
+    student: Optional[StudentRead] = None
+    reported_by: Optional[TeacherRead] = None
+
+    class Config:
+        from_attributes = True
+
+
+class DisciplinaryUpdate(BaseModel):
+    """Schema for updating disciplinary record information."""
+    violation_type: Optional[ViolationType] = None
+    severity: Optional[SeverityLevel] = None
+    description: Optional[str] = None
+    action_taken: Optional[str] = None
+    is_resolved: Optional[bool] = None
+    resolved_date: Optional[date] = None
+    resolution_notes: Optional[str] = None
+
+
+
+
+
+
+
+
