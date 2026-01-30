@@ -2,7 +2,7 @@ from datetime import datetime, date, time
 from enum import Enum as PyEnum
 from sqlalchemy import String, Integer, DateTime, Date, Time, ForeignKey, Enum, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from typing import List, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING
 
 from backend.src.database import Base
 
@@ -26,6 +26,7 @@ class DayOfWeek(str, PyEnum):
 class Schedule(Base):
     """
     Class schedule - links groups, subjects, teachers with time slots.
+    All schedules are date-specific (no recurring templates).
     """
     __tablename__ = "schedules"
 
@@ -34,8 +35,9 @@ class Schedule(Base):
     subject_id: Mapped[int] = mapped_column(ForeignKey("subjects.id"))
     teacher_id: Mapped[int] = mapped_column(ForeignKey("teachers.id"))
 
-    # Schedule details
-    day_of_week: Mapped[DayOfWeek] = mapped_column(Enum(DayOfWeek))
+    # Schedule details - specific date only (no templates)
+    specific_date: Mapped[date] = mapped_column(Date, index=True)
+    
     start_time: Mapped[time] = mapped_column(Time)
     end_time: Mapped[time] = mapped_column(Time)
     room: Mapped[str] = mapped_column(String(50))  # Аудитория
@@ -54,7 +56,7 @@ class Schedule(Base):
     attendances: Mapped[List["Attendance"]] = relationship(back_populates="schedule")
 
     def __repr__(self):
-        return f"<Schedule(id={self.id}, day={self.day_of_week}, time={self.start_time}-{self.end_time})>"
+        return f"<Schedule(id={self.id}, date={self.specific_date}, time={self.start_time}-{self.end_time})>"
 
 
 

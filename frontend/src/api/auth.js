@@ -16,6 +16,11 @@ export const authAPI = {
     return response.data;
   },
 
+  refreshToken: async () => {
+    const response = await api.post('/auth/refresh-token');
+    return response.data;
+  },
+
   changePassword: async (oldPassword, newPassword) => {
     const response = await api.post('/auth/change-password', null, {
       params: { old_password: oldPassword, new_password: newPassword },
@@ -150,8 +155,32 @@ export const scheduleAPI = {
     return response.data;
   },
   
+  getByDateRange: async (groupId, dateFrom, dateTo) => {
+    const response = await api.get('/schedule/by-date-range', { 
+      params: { group_id: groupId, date_from: dateFrom, date_to: dateTo } 
+    });
+    return response.data;
+  },
+  
   create: async (data) => {
     const response = await api.post('/schedule', data);
+    return response.data;
+  },
+  
+  bulkCreate: async (data) => {
+    const response = await api.post('/schedule/bulk', data);
+    return response.data;
+  },
+  
+  copyWeek: async (sourceDate, targetDate, groupId) => {
+    const response = await api.post('/schedule/copy-week', null, {
+      params: { source_date: sourceDate, target_date: targetDate, group_id: groupId }
+    });
+    return response.data;
+  },
+  
+  createMonthly: async (data) => {
+    const response = await api.post('/schedule/create-monthly', data);
     return response.data;
   },
   
@@ -191,9 +220,50 @@ export const attendanceAPI = {
     return response.data;
   },
   
+  createBulkSimple: async (data) => {
+    const response = await api.post('/attendance/bulk-simple', data);
+    return response.data;
+  },
+  
   update: async (id, data) => {
     const response = await api.patch(`/attendance/${id}`, data);
     return response.data;
+  },
+};
+
+export const assessmentEventsAPI = {
+  getAll: async (params = {}) => {
+    const response = await api.get('/assessment-events', { params });
+    return response.data;
+  },
+  
+  getById: async (id) => {
+    const response = await api.get(`/assessment-events/${id}`);
+    return response.data;
+  },
+  
+  getEventGrades: async (eventId) => {
+    const response = await api.get(`/assessment-events/${eventId}/grades`);
+    return response.data;
+  },
+  
+  bulkUpdateGrades: async (eventId, grades) => {
+    const response = await api.post(`/assessment-events/${eventId}/grades/bulk`, grades);
+    return response.data;
+  },
+  
+  create: async (data) => {
+    const response = await api.post('/assessment-events', data);
+    return response.data;
+  },
+  
+  update: async (id, data) => {
+    const response = await api.patch(`/assessment-events/${id}`, data);
+    return response.data;
+  },
+  
+  delete: async (id) => {
+    await api.delete(`/assessment-events/${id}`);
   },
 };
 
@@ -203,13 +273,8 @@ export const gradesAPI = {
     return response.data;
   },
   
-  getMy: async (params = {}) => {
-    const response = await api.get('/grades/my', { params });
-    return response.data;
-  },
-  
-  getStudentStats: async (studentId, params = {}) => {
-    const response = await api.get(`/grades/stats/student/${studentId}`, { params });
+  bulkCreate: async (data) => {
+    const response = await api.post('/grades/bulk', data);
     return response.data;
   },
   
@@ -221,6 +286,10 @@ export const gradesAPI = {
   update: async (id, data) => {
     const response = await api.patch(`/grades/${id}`, data);
     return response.data;
+  },
+  
+  delete: async (id) => {
+    await api.delete(`/grades/${id}`);
   },
 };
 

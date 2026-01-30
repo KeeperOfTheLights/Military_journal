@@ -29,6 +29,28 @@ class AttendanceRecord(BaseModel):
     reason: Optional[str] = None
 
 
+class AttendanceSimpleRecord(BaseModel):
+    """Simplified attendance record for quick marking."""
+    student_id: int
+    date: date
+    status: AttendanceStatus
+    notes: Optional[str] = None
+
+
+class AttendanceSimpleBulkCreate(BaseModel):
+    """Schema for simplified bulk attendance (without schedule selection)."""
+    group_id: int
+    date: date
+    records: List["AttendanceSimpleRecordItem"]
+
+
+class AttendanceSimpleRecordItem(BaseModel):
+    """Single student attendance for simple bulk operations."""
+    student_id: int
+    status: AttendanceStatus
+    notes: Optional[str] = None
+
+
 class AttendanceRead(BaseModel):
     """Schema for reading attendance information."""
     id: int
@@ -53,8 +75,9 @@ class AttendanceUpdate(BaseModel):
     reason: Optional[str] = None
 
 
-# Rebuild model to resolve forward references
+# Rebuild models to resolve forward references
 AttendanceBulkCreate.model_rebuild()
+AttendanceSimpleBulkCreate.model_rebuild()
 
 
 

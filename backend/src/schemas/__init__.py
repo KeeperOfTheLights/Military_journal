@@ -15,6 +15,23 @@ from backend.src.schemas.analytics import (
     StudentAnalytics,
     GroupAnalytics,
 )
+from backend.src.schemas.attachments import (
+    AttachmentCreate,
+    AttachmentRead,
+    AttachmentUpdate,
+    AttachmentUploadResponse,
+    AttachmentListResponse,
+    StorageInfoResponse,
+)
+from backend.src.schemas.errors import (
+    ErrorResponse,
+    ErrorDetail,
+    ValidationErrorResponse,
+    AuthenticationErrorResponse,
+    AuthorizationErrorResponse,
+    NotFoundErrorResponse,
+    COMMON_ERROR_RESPONSES,
+)
 
 __all__ = [
     # Users
@@ -39,6 +56,13 @@ __all__ = [
     "DisciplinaryCreate", "DisciplinaryRead", "DisciplinaryUpdate",
     # Analytics
     "AttendanceStats", "GradeStats", "StudentAnalytics", "GroupAnalytics",
+    # Attachments
+    "AttachmentCreate", "AttachmentRead", "AttachmentUpdate",
+    "AttachmentUploadResponse", "AttachmentListResponse", "StorageInfoResponse",
+    # Errors
+    "ErrorResponse", "ErrorDetail", "ValidationErrorResponse",
+    "AuthenticationErrorResponse", "AuthorizationErrorResponse",
+    "NotFoundErrorResponse", "COMMON_ERROR_RESPONSES",
 ]
 
 

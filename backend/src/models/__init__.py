@@ -9,6 +9,8 @@ from backend.src.models.attendance import Attendance
 from backend.src.models.grades import Grade
 from backend.src.models.assignments import Assignment
 from backend.src.models.disciplinary import DisciplinaryRecord
+from backend.src.models.attachments import Attachment, AttachmentType, AttachmentEntity
+from backend.src.models.assessment_events import AssessmentEvent, AssessmentEventType
 
 __all__ = [
     "User",
@@ -21,6 +23,11 @@ __all__ = [
     "Grade",
     "Assignment",
     "DisciplinaryRecord",
+    "Attachment",
+    "AttachmentType",
+    "AttachmentEntity",
+    "AssessmentEvent",
+    "AssessmentEventType",
 ]
 
 

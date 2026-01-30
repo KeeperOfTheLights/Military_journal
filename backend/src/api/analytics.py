@@ -14,6 +14,7 @@ from backend.src.models.attendance import Attendance, AttendanceStatus
 from backend.src.models.grades import Grade
 from backend.src.models.disciplinary import DisciplinaryRecord
 from backend.src.models.schedule import Schedule
+from backend.src.models.assessment_events import AssessmentEvent
 from backend.src.schemas.analytics import DashboardStats, GroupAnalytics, StudentAnalytics
 
 router = APIRouter(prefix="/analytics", tags=["Analytics"])
@@ -70,9 +71,9 @@ async def get_dashboard_stats(
     semester_present = semester_stats.get("present", 0) + semester_stats.get("late", 0)
     semester_rate = (semester_present / semester_total * 100) if semester_total > 0 else 0
 
-    # Average grade
+    # Average grade (score is already 0-100)
     avg_grade_result = await session.execute(
-        select(func.avg(Grade.score * 100 / Grade.max_score))
+        select(func.avg(Grade.score)).where(Grade.score.isnot(None))
     )
     avg_grade = avg_grade_result.scalar() or 0
 
@@ -151,10 +152,10 @@ async def get_group_analytics(
     att_present = att_stats.get("present", 0) + att_stats.get("late", 0)
     avg_attendance = (att_present / att_total * 100) if att_total > 0 else 0
 
-    # Calculate average grade
+    # Calculate average grade (score is 0-100)
     avg_grade_result = await session.execute(
-        select(func.avg(Grade.score * 100 / Grade.max_score)).where(
-            Grade.student_id.in_(student_ids)
+        select(func.avg(Grade.score)).where(
+            and_(Grade.student_id.in_(student_ids), Grade.score.isnot(None))
         )
     )
     avg_grade = avg_grade_result.scalar() or 0
@@ -164,11 +165,11 @@ async def get_group_analytics(
         Student.id,
         Student.first_name,
         Student.last_name,
-        func.avg(Grade.score * 100 / Grade.max_score).label("average")
+        func.avg(Grade.score).label("average")
     ).join(Grade).where(
-        Student.group_id == group_id
+        and_(Student.group_id == group_id, Grade.score.isnot(None))
     ).group_by(Student.id, Student.first_name, Student.last_name).order_by(
-        func.avg(Grade.score * 100 / Grade.max_score).desc()
+        func.avg(Grade.score).desc()
     ).limit(5)
 
     top_result = await session.execute(top_students_query)
@@ -196,13 +197,21 @@ async def get_group_analytics(
         for r in att_subj_result.all()
     }
 
-    # Grades by subject
+    # Grades by subject (through assessment_events)
     grades_by_subject_query = select(
         Subject.name,
-        func.avg(Grade.score * 100 / Grade.max_score).label("average")
-    ).join(Subject).where(
-        Grade.student_id.in_(student_ids)
+        func.avg(Grade.score).label("average")
+    ).join(AssessmentEvent, Grade.assessment_event_id == AssessmentEvent.id).join(
+        Subject, AssessmentEvent.subject_id == Subject.id
+    ).where(
+        and_(Grade.student_id.in_(student_ids), Grade.score.isnot(None))
     ).group_by(Subject.name)
+
+    # Apply filters if provided
+    if academic_year:
+        grades_by_subject_query = grades_by_subject_query.where(AssessmentEvent.academic_year == academic_year)
+    if semester:
+        grades_by_subject_query = grades_by_subject_query.where(AssessmentEvent.semester == semester)
 
     grades_subj_result = await session.execute(grades_by_subject_query)
     grades_by_subject = {
@@ -276,20 +285,22 @@ async def get_student_analytics(
     excused = att_stats.get("excused", 0)
     attendance_rate = ((present + late) / total_classes * 100) if total_classes > 0 else 0
 
-    # Grade statistics by subject
+    # Grade statistics by subject (through assessment_events)
     grade_query = select(
         Subject.id,
         Subject.name,
-        func.avg(Grade.score * 100 / Grade.max_score).label("avg"),
-        func.min(Grade.score * 100 / Grade.max_score).label("min"),
-        func.max(Grade.score * 100 / Grade.max_score).label("max"),
+        func.avg(Grade.score).label("avg"),
+        func.min(Grade.score).label("min"),
+        func.max(Grade.score).label("max"),
         func.count(Grade.id).label("count")
-    ).join(Subject).where(Grade.student_id == student_id)
+    ).join(AssessmentEvent, Grade.assessment_event_id == AssessmentEvent.id).join(
+        Subject, AssessmentEvent.subject_id == Subject.id
+    ).where(and_(Grade.student_id == student_id, Grade.score.isnot(None)))
 
     if academic_year:
-        grade_query = grade_query.where(Grade.academic_year == academic_year)
+        grade_query = grade_query.where(AssessmentEvent.academic_year == academic_year)
     if semester:
-        grade_query = grade_query.where(Grade.semester == semester)
+        grade_query = grade_query.where(AssessmentEvent.semester == semester)
 
     grade_query = grade_query.group_by(Subject.id, Subject.name)
     grade_result = await session.execute(grade_query)
@@ -420,30 +431,34 @@ async def get_grades_distribution(
     """
     Get grade distribution statistics.
     """
-    # Define grade ranges
+    # Define grade ranges (score is 0-100)
     query = select(
-        func.count(Grade.id).filter(Grade.score * 100 / Grade.max_score >= 90).label("a_count"),
+        func.count(Grade.id).filter(Grade.score >= 90).label("a_count"),
         func.count(Grade.id).filter(
-            and_(Grade.score * 100 / Grade.max_score >= 80, Grade.score * 100 / Grade.max_score < 90)
+            and_(Grade.score >= 80, Grade.score < 90)
         ).label("b_count"),
         func.count(Grade.id).filter(
-            and_(Grade.score * 100 / Grade.max_score >= 70, Grade.score * 100 / Grade.max_score < 80)
+            and_(Grade.score >= 70, Grade.score < 80)
         ).label("c_count"),
         func.count(Grade.id).filter(
-            and_(Grade.score * 100 / Grade.max_score >= 60, Grade.score * 100 / Grade.max_score < 70)
+            and_(Grade.score >= 60, Grade.score < 70)
         ).label("d_count"),
-        func.count(Grade.id).filter(Grade.score * 100 / Grade.max_score < 60).label("f_count"),
+        func.count(Grade.id).filter(Grade.score < 60).label("f_count"),
         func.count(Grade.id).label("total"),
-    )
+    ).where(Grade.score.isnot(None))
 
-    if subject_id:
-        query = query.where(Grade.subject_id == subject_id)
+    # Join with assessment_events for filtering
+    if subject_id or academic_year or semester:
+        query = query.join(AssessmentEvent, Grade.assessment_event_id == AssessmentEvent.id)
+        if subject_id:
+            query = query.where(AssessmentEvent.subject_id == subject_id)
+        if academic_year:
+            query = query.where(AssessmentEvent.academic_year == academic_year)
+        if semester:
+            query = query.where(AssessmentEvent.semester == semester)
+    
     if group_id:
-        query = query.join(Student).where(Student.group_id == group_id)
-    if academic_year:
-        query = query.where(Grade.academic_year == academic_year)
-    if semester:
-        query = query.where(Grade.semester == semester)
+        query = query.join(Student, Grade.student_id == Student.id).where(Student.group_id == group_id)
 
     result = await session.execute(query)
     r = result.one()
@@ -463,11 +478,3 @@ async def get_grades_distribution(
             "F": round(r.f_count / r.total * 100 if r.total > 0 else 0, 2),
         }
     }
-
-
-
-
-
-
-
-

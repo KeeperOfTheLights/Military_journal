@@ -170,21 +170,30 @@ export default function Dashboard() {
 
           <div className="schedule-list">
             {schedule.length > 0 ? (
-              schedule.map((item) => (
-                <div key={item.id} className="schedule-item">
-                  <div className="schedule-time">
-                    <Clock size={16} />
-                    <span>{item.start_time?.slice(0, 5)} - {item.end_time?.slice(0, 5)}</span>
+              schedule.map((item) => {
+                const scheduleDate = item.specific_date 
+                  ? new Date(item.specific_date.split('-')[0], item.specific_date.split('-')[1] - 1, item.specific_date.split('-')[2])
+                  : null;
+                const formattedDate = scheduleDate 
+                  ? scheduleDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', weekday: 'short' })
+                  : 'Дата не указана';
+                
+                return (
+                  <div key={item.id} className="schedule-item">
+                    <div className="schedule-time">
+                      <Clock size={16} />
+                      <span>{item.start_time?.slice(0, 5)} - {item.end_time?.slice(0, 5)}</span>
+                    </div>
+                    <div className="schedule-info">
+                      <h4>{item.subject?.name || 'Предмет'}</h4>
+                      <p>
+                        {formattedDate} • Ауд. {item.room}
+                        {item.group && ` • ${item.group.name}`}
+                      </p>
+                    </div>
                   </div>
-                  <div className="schedule-info">
-                    <h4>{item.subject?.name || 'Предмет'}</h4>
-                    <p>
-                      {getDayName(item.day_of_week)} • Ауд. {item.room}
-                      {item.group && ` • ${item.group.name}`}
-                    </p>
-                  </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="empty-state">
                 <Calendar size={48} />

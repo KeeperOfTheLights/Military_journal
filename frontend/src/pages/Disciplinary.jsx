@@ -15,11 +15,14 @@ export default function Disciplinary() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [students, setStudents] = useState([]);
+  const [teachers, setTeachers] = useState([]);
   const [formData, setFormData] = useState({
     student_id: '',
-    violation_type: 'minor',
+    violation_type: 'behavior',
+    severity: 'minor',
     description: '',
     date: new Date().toISOString().split('T')[0],
+    reported_by_id: null,
   });
   const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -27,6 +30,15 @@ export default function Disciplinary() {
   const isTeacherOrAdmin = user?.role === 'teacher' || user?.role === 'admin';
 
   const violationTypes = [
+    { value: 'uniform', label: 'Нарушение формы одежды' },
+    { value: 'late', label: 'Опоздание' },
+    { value: 'absence', label: 'Неявка без уважительной причины' },
+    { value: 'behavior', label: 'Нарушение дисциплины' },
+    { value: 'disrespect', label: 'Неуважительное отношение' },
+    { value: 'other', label: 'Другое' },
+  ];
+
+  const severityLevels = [
     { value: 'minor', label: 'Незначительное', color: 'warning' },
     { value: 'moderate', label: 'Умеренное', color: 'orange' },
     { value: 'major', label: 'Серьёзное', color: 'danger' },
@@ -42,12 +54,14 @@ export default function Disciplinary() {
       setLoading(true);
       
       if (isTeacherOrAdmin) {
-        const [recordsData, studentsData] = await Promise.all([
+        const [recordsData, studentsData, teachersData] = await Promise.all([
           disciplinaryAPI.getAll(),
-          studentsAPI.getAll()
+          studentsAPI.getAll(),
+          import('../api/auth').then(m => m.teachersAPI.getAll())
         ]);
         setRecords(recordsData);
         setStudents(studentsData);
+        setTeachers(teachersData);
       } else {
         const myRecords = await disciplinaryAPI.getMy();
         setRecords(myRecords);
@@ -60,11 +74,15 @@ export default function Disciplinary() {
   };
 
   const openCreateModal = () => {
+    // Find current teacher's ID
+    const currentTeacher = teachers.find(t => t.user_id === user.id);
     setFormData({
       student_id: '',
-      violation_type: 'minor',
+      violation_type: 'behavior',
+      severity: 'minor',
       description: '',
       date: new Date().toISOString().split('T')[0],
+      reported_by_id: currentTeacher?.id || null,
     });
     setShowModal(true);
   };
@@ -76,11 +94,21 @@ export default function Disciplinary() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!formData.reported_by_id) {
+      alert('Не удалось определить преподавателя. Попробуйте перезагрузить страницу.');
+      return;
+    }
+    
     setSaving(true);
     try {
       await disciplinaryAPI.create({
-        ...formData,
-        student_id: parseInt(formData.student_id)
+        student_id: parseInt(formData.student_id),
+        violation_type: formData.violation_type,
+        severity: formData.severity,
+        description: formData.description,
+        date: formData.date,
+        reported_by_id: parseInt(formData.reported_by_id)
       });
       setShowModal(false);
       loadData();
@@ -107,6 +135,10 @@ export default function Disciplinary() {
 
   const getViolationType = (type) => {
     return violationTypes.find(v => v.value === type) || violationTypes[0];
+  };
+
+  const getSeverity = (severity) => {
+    return severityLevels.find(s => s.value === severity) || severityLevels[0];
   };
 
   const filteredRecords = records.filter(record => {
@@ -170,6 +202,7 @@ export default function Disciplinary() {
             <tbody>
               {filteredRecords.map(record => {
                 const vType = getViolationType(record.violation_type);
+                const severity = getSeverity(record.severity);
                 return (
                   <tr key={record.id}>
                     <td>
@@ -187,8 +220,9 @@ export default function Disciplinary() {
                       </div>
                     </td>
                     <td>
-                      <span className={`badge badge-${vType.color}`}>
-                        {vType.label}
+                      <div>{vType.label}</div>
+                      <span className={`badge badge-${severity.color}`} style={{ marginTop: '0.25rem', display: 'inline-block' }}>
+                        {severity.label}
                       </span>
                     </td>
                     <td className="description-cell">
@@ -243,7 +277,13 @@ export default function Disciplinary() {
             <form onSubmit={handleSubmit}>
               <div className="modal-body">
                 <div className="form-group">
-                  <label className="form-label">Студент</label>
+                  <label className="form-label">Студент {students.length > 0 && `(${students.length})`}</label>
+                  {students.length === 0 && (
+                    <div className="alert alert-warning" style={{ marginBottom: '1rem' }}>
+                      <AlertTriangle size={16} />
+                      <span>Список студентов пуст. Проверьте подключение к API.</span>
+                    </div>
+                  )}
                   <select
                     className="form-input"
                     value={formData.student_id}
@@ -253,7 +293,7 @@ export default function Disciplinary() {
                     <option value="">Выберите студента</option>
                     {students.map(student => (
                       <option key={student.id} value={student.id}>
-                        {student.last_name} {student.first_name}
+                        {student.last_name} {student.first_name} ({student.group?.name || 'Без группы'})
                       </option>
                     ))}
                   </select>
@@ -266,6 +306,7 @@ export default function Disciplinary() {
                       className="form-input"
                       value={formData.violation_type}
                       onChange={(e) => setFormData({ ...formData, violation_type: e.target.value })}
+                      required
                     >
                       {violationTypes.map(type => (
                         <option key={type.value} value={type.value}>{type.label}</option>
@@ -274,15 +315,29 @@ export default function Disciplinary() {
                   </div>
                   
                   <div className="form-group">
-                    <label className="form-label">Дата</label>
-                    <input
-                      type="date"
+                    <label className="form-label">Серьезность</label>
+                    <select
                       className="form-input"
-                      value={formData.date}
-                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                      value={formData.severity}
+                      onChange={(e) => setFormData({ ...formData, severity: e.target.value })}
                       required
-                    />
+                    >
+                      {severityLevels.map(level => (
+                        <option key={level.value} value={level.value}>{level.label}</option>
+                      ))}
+                    </select>
                   </div>
+                </div>
+                
+                <div className="form-group">
+                  <label className="form-label">Дата</label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    value={formData.date}
+                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    required
+                  />
                 </div>
                 
                 <div className="form-group">
@@ -331,8 +386,12 @@ export default function Disciplinary() {
               </div>
               <div className="detail-row">
                 <span className="label">Тип нарушения</span>
-                <span className={`badge badge-${getViolationType(selectedRecord.violation_type).color}`}>
-                  {getViolationType(selectedRecord.violation_type).label}
+                <span className="value">{getViolationType(selectedRecord.violation_type).label}</span>
+              </div>
+              <div className="detail-row">
+                <span className="label">Серьезность</span>
+                <span className={`badge badge-${getSeverity(selectedRecord.severity).color}`}>
+                  {getSeverity(selectedRecord.severity).label}
                 </span>
               </div>
               <div className="detail-row">

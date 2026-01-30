@@ -7,8 +7,8 @@ from backend.src.database import Base
 
 if TYPE_CHECKING:
     from backend.src.models.schedule import Schedule
-    from backend.src.models.grades import Grade
     from backend.src.models.assignments import Assignment
+    from backend.src.models.assessment_events import AssessmentEvent
 
 
 class Subject(Base):
@@ -26,8 +26,8 @@ class Subject(Base):
 
     # Relationships
     schedules: Mapped[List["Schedule"]] = relationship(back_populates="subject")
-    grades: Mapped[List["Grade"]] = relationship(back_populates="subject")
     assignments: Mapped[List["Assignment"]] = relationship(back_populates="subject")
+    assessment_events: Mapped[List["AssessmentEvent"]] = relationship(back_populates="subject")
 
     def __repr__(self):
         return f"<Subject(id={self.id}, name='{self.name}', code='{self.code}')>"

@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from backend.src.models.students import Student
     from backend.src.models.schedule import Schedule
     from backend.src.models.assignments import Assignment
+    from backend.src.models.assessment_events import AssessmentEvent
 
 
 class Group(Base):
@@ -27,6 +28,7 @@ class Group(Base):
     students: Mapped[List["Student"]] = relationship(back_populates="group")
     schedules: Mapped[List["Schedule"]] = relationship(back_populates="group")
     assignments: Mapped[List["Assignment"]] = relationship(back_populates="group")
+    assessment_events: Mapped[List["AssessmentEvent"]] = relationship(back_populates="group")
 
     def __repr__(self):
         return f"<Group(id={self.id}, name='{self.name}', course={self.course})>"

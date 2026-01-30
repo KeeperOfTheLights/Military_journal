@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
+import TokenExpirationWarning from './components/TokenExpirationWarning';
 
 // Layout
 import Layout from './components/layout/Layout';
@@ -19,6 +20,7 @@ import Teachers from './pages/Teachers';
 import AttendanceMarking from './pages/AttendanceMarking';
 import GradesEntry from './pages/GradesEntry';
 import ScheduleManagement from './pages/ScheduleManagement';
+import ScheduleCalendar from './pages/ScheduleCalendar';
 import Assignments from './pages/Assignments';
 import Disciplinary from './pages/Disciplinary';
 import Analytics from './pages/Analytics';
@@ -38,6 +40,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <TokenExpirationWarning />
         <BrowserRouter>
           <Routes>
             {/* Public routes */}
@@ -62,6 +65,7 @@ function App() {
               <Route path="/attendance/mark" element={<AttendanceMarking />} />
               <Route path="/grades/entry" element={<GradesEntry />} />
               <Route path="/schedule/manage" element={<ScheduleManagement />} />
+              <Route path="/schedule/calendar" element={<ScheduleCalendar />} />
               <Route path="/disciplinary" element={<Disciplinary />} />
               <Route path="/analytics" element={<Analytics />} />
               

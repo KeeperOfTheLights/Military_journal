@@ -12,6 +12,8 @@ from backend.src.api.grades import router as grades_router
 from backend.src.api.assignments import router as assignments_router
 from backend.src.api.disciplinary import router as disciplinary_router
 from backend.src.api.analytics import router as analytics_router
+from backend.src.api.attachments import router as attachments_router
+from backend.src.api.assessment_events import router as assessment_events_router
 
 main_router = APIRouter()
 
@@ -28,3 +30,5 @@ main_router.include_router(grades_router, prefix="/api")
 main_router.include_router(assignments_router, prefix="/api")
 main_router.include_router(disciplinary_router, prefix="/api")
 main_router.include_router(analytics_router, prefix="/api")
+main_router.include_router(attachments_router, prefix="/api")
+main_router.include_router(assessment_events_router, prefix="/api")

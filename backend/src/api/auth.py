@@ -155,6 +155,24 @@ async def get_current_user_info(current_user: CurrentUser):
     return UserRead.model_validate(current_user)
 
 
+@router.post("/refresh-token", response_model=TokenResponse)
+async def refresh_token(current_user: CurrentUser):
+    """
+    Refresh access token for authenticated user.
+    Returns a new token with extended expiration time.
+    """
+    # Create new access token
+    access_token = create_access_token(
+        data={"sub": str(current_user.id), "role": current_user.role.value},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    
+    return TokenResponse(
+        access_token=access_token,
+        user=UserRead.model_validate(current_user)
+    )
+
+
 @router.post("/change-password")
 async def change_password(
     current_user: CurrentUser,

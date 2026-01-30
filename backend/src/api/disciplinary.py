@@ -7,6 +7,7 @@ from sqlalchemy.orm import selectinload
 from backend.src.api.dependencies import SessionDep, TeacherUser, CurrentUser
 from backend.src.models.disciplinary import DisciplinaryRecord, ViolationType, SeverityLevel
 from backend.src.models.students import Student
+from backend.src.models.groups import Group
 from backend.src.models.teachers import Teacher
 from backend.src.models.users import UserRole
 from backend.src.schemas.disciplinary import DisciplinaryCreate, DisciplinaryRead, DisciplinaryUpdate
@@ -52,12 +53,12 @@ async def create_disciplinary_record(
     await session.commit()
     await session.refresh(new_record)
 
-    # Load relationships
+    # Load relationships including nested ones
     result = await session.execute(
         select(DisciplinaryRecord)
         .where(DisciplinaryRecord.id == new_record.id)
         .options(
-            selectinload(DisciplinaryRecord.student),
+            selectinload(DisciplinaryRecord.student).selectinload(Student.group),
             selectinload(DisciplinaryRecord.reported_by),
         )
     )
@@ -85,7 +86,7 @@ async def list_disciplinary_records(
     Students can only see their own records.
     """
     query = select(DisciplinaryRecord).options(
-        selectinload(DisciplinaryRecord.student),
+        selectinload(DisciplinaryRecord.student).selectinload(Student.group),
         selectinload(DisciplinaryRecord.reported_by),
     )
 

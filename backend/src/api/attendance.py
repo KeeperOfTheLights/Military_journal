@@ -14,6 +14,7 @@ from backend.src.schemas.attendance import (
     AttendanceRead,
     AttendanceUpdate,
     AttendanceBulkCreate,
+    AttendanceSimpleBulkCreate,
 )
 
 router = APIRouter(prefix="/attendance", tags=["Attendance"])
@@ -118,6 +119,129 @@ async def create_bulk_attendance(
     return [AttendanceRead.model_validate(r) for r in created_records]
 
 
+@router.post("/bulk-simple", status_code=status.HTTP_201_CREATED)
+async def create_bulk_attendance_simple(
+    bulk_data: AttendanceSimpleBulkCreate,
+    session: SessionDep,
+    current_user: TeacherUser,
+):
+    """
+    Simplified bulk attendance marking by group (teachers and admins only).
+    Automatically finds or creates a schedule for the given group and date.
+    """
+    from backend.src.models.groups import Group
+    from backend.src.models.subjects import Subject
+    from backend.src.models.teachers import Teacher
+    from datetime import time
+    
+    # Verify group exists
+    group_result = await session.execute(
+        select(Group).where(Group.id == bulk_data.group_id)
+    )
+    group = group_result.scalar_one_or_none()
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    
+    # Find any active schedule for this group (use first available)
+    schedule_result = await session.execute(
+        select(Schedule).where(
+            and_(
+                Schedule.group_id == bulk_data.group_id,
+                Schedule.is_active == True
+            )
+        ).limit(1)
+    )
+    schedule = schedule_result.scalar_one_or_none()
+    
+    # If no schedule exists, create a default one
+    if not schedule:
+        # Get first available subject
+        subject_result = await session.execute(select(Subject).limit(1))
+        subject = subject_result.scalar_one_or_none()
+        
+        # Get first available teacher (or current user's teacher profile)
+        teacher_result = await session.execute(
+            select(Teacher).where(Teacher.user_id == current_user.id)
+        )
+        teacher = teacher_result.scalar_one_or_none()
+        
+        if not teacher:
+            teacher_result = await session.execute(select(Teacher).limit(1))
+            teacher = teacher_result.scalar_one_or_none()
+        
+        if not subject or not teacher:
+            raise HTTPException(
+                status_code=400, 
+                detail="Cannot create attendance: no subjects or teachers in the system"
+            )
+        
+        # Create a default schedule for this group and date
+        schedule = Schedule(
+            group_id=bulk_data.group_id,
+            subject_id=subject.id,
+            teacher_id=teacher.id,
+            specific_date=bulk_data.date,
+            start_time=time(8, 0),
+            end_time=time(9, 30),
+            room="Общее",
+            semester=1,
+            academic_year="2025-2026",
+            is_active=True,
+        )
+        session.add(schedule)
+        await session.flush()  # Get the ID
+    
+    created_count = 0
+    updated_count = 0
+    unchanged_count = 0
+
+    for record in bulk_data.records:
+        # Check if already exists - update if so
+        existing_result = await session.execute(
+            select(Attendance).where(
+                and_(
+                    Attendance.student_id == record.student_id,
+                    Attendance.schedule_id == schedule.id,
+                    Attendance.date == bulk_data.date,
+                )
+            )
+        )
+        existing = existing_result.scalar_one_or_none()
+        
+        if existing:
+            # Check if values actually changed
+            status_changed = existing.status != record.status
+            notes_changed = (existing.reason or '') != (record.notes or '')
+            
+            if status_changed or notes_changed:
+                existing.status = record.status
+                existing.reason = record.notes
+                updated_count += 1
+            else:
+                unchanged_count += 1
+        else:
+            # Create new record
+            new_attendance = Attendance(
+                student_id=record.student_id,
+                schedule_id=schedule.id,
+                date=bulk_data.date,
+                status=record.status,
+                reason=record.notes,
+            )
+            session.add(new_attendance)
+            created_count += 1
+
+    await session.commit()
+
+    return {
+        "message": "Посещаемость успешно сохранена",
+        "created": created_count,
+        "updated": updated_count,
+        "unchanged": unchanged_count,
+        "total": created_count + updated_count,
+    }
+
+
 @router.get("/", response_model=List[AttendanceRead])
 async def list_attendance(
     session: SessionDep,
@@ -134,7 +258,9 @@ async def list_attendance(
     """
     List attendance records with optional filters.
     """
-    query = select(Attendance).options(selectinload(Attendance.student))
+    query = select(Attendance).options(
+        selectinload(Attendance.student).selectinload(Student.group)
+    )
 
     if student_id:
         query = query.where(Attendance.student_id == student_id)
@@ -180,7 +306,9 @@ async def get_my_attendance(
     if not student:
         raise HTTPException(status_code=404, detail="Student profile not found")
 
-    query = select(Attendance).where(Attendance.student_id == student.id)
+    query = select(Attendance).options(
+        selectinload(Attendance.student).selectinload(Student.group)
+    ).where(Attendance.student_id == student.id)
 
     if date_from:
         query = query.where(Attendance.date >= date_from)
@@ -255,7 +383,7 @@ async def get_attendance(
     result = await session.execute(
         select(Attendance)
         .where(Attendance.id == attendance_id)
-        .options(selectinload(Attendance.student))
+        .options(selectinload(Attendance.student).selectinload(Student.group))
     )
     attendance = result.scalar_one_or_none()
 
@@ -278,7 +406,7 @@ async def update_attendance(
     result = await session.execute(
         select(Attendance)
         .where(Attendance.id == attendance_id)
-        .options(selectinload(Attendance.student))
+        .options(selectinload(Attendance.student).selectinload(Student.group))
     )
     attendance = result.scalar_one_or_none()
 

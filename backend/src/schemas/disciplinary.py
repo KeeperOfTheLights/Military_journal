@@ -1,5 +1,5 @@
 from datetime import datetime, date
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, computed_field
 from typing import Optional
 
 from backend.src.models.disciplinary import ViolationType, SeverityLevel
@@ -21,8 +21,8 @@ class DisciplinaryCreate(BaseModel):
     @classmethod
     def validate_description(cls, v: str) -> str:
         v = v.strip()
-        if len(v) < 10:
-            raise ValueError('Description must be at least 10 characters')
+        if len(v) < 3:
+            raise ValueError('Description must be at least 3 characters')
         return v
 
 
@@ -46,6 +46,14 @@ class DisciplinaryRead(BaseModel):
     # Nested
     student: Optional[StudentRead] = None
     reported_by: Optional[TeacherRead] = None
+
+    @computed_field
+    @property
+    def student_name(self) -> str:
+        """Computed field for student's full name."""
+        if self.student:
+            return f"{self.student.last_name} {self.student.first_name}"
+        return "Студент"
 
     class Config:
         from_attributes = True

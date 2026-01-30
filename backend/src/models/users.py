@@ -2,13 +2,14 @@ from datetime import datetime
 from enum import Enum as PyEnum
 from sqlalchemy import String, DateTime, Enum, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING
 
 from backend.src.database import Base
 
 if TYPE_CHECKING:
     from backend.src.models.students import Student
     from backend.src.models.teachers import Teacher
+    from backend.src.models.attachments import Attachment
 
 
 class UserRole(str, PyEnum):
@@ -36,6 +37,7 @@ class User(Base):
     # Relationships
     student: Mapped[Optional["Student"]] = relationship(back_populates="user", uselist=False)
     teacher: Mapped[Optional["Teacher"]] = relationship(back_populates="user", uselist=False)
+    attachments: Mapped[List["Attachment"]] = relationship(back_populates="uploaded_by")
 
     def __repr__(self):
         return f"<User(id={self.id}, email='{self.email}', role='{self.role}')>"
