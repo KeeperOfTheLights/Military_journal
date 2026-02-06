@@ -11,9 +11,9 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from pydantic import ValidationError as PydanticValidationError
 
-from backend.src.api.router import main_router
-from backend.src.exceptions import APIError, RateLimitError
-from backend.src.schemas.errors import ErrorResponse
+from src.api.router import main_router
+from src.exceptions import APIError, RateLimitError
+from src.schemas.errors import ErrorResponse
 
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -277,7 +277,7 @@ async def health_check():
 @app.get("/debug/token")
 async def debug_token(authorization: str = None):
     """Debug endpoint to test token decoding."""
-    from backend.src.security import decode_access_token
+    from security import decode_access_token
     
     if not authorization:
         return {"error": "No authorization header"}

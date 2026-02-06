@@ -4,18 +4,18 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select, func, and_
 from sqlalchemy.orm import selectinload
 
-from backend.src.api.dependencies import SessionDep, TeacherUser, CurrentUser
-from backend.src.models.users import User, UserRole
-from backend.src.models.students import Student
-from backend.src.models.teachers import Teacher
-from backend.src.models.groups import Group
-from backend.src.models.subjects import Subject
-from backend.src.models.attendance import Attendance, AttendanceStatus
-from backend.src.models.grades import Grade
-from backend.src.models.disciplinary import DisciplinaryRecord
-from backend.src.models.schedule import Schedule
-from backend.src.models.assessment_events import AssessmentEvent
-from backend.src.schemas.analytics import DashboardStats, GroupAnalytics, StudentAnalytics
+from src.api.dependencies import SessionDep, TeacherUser, CurrentUser
+from src.models.users import User, UserRole
+from src.models.students import Student
+from src.models.teachers import Teacher
+from src.models.groups import Group
+from src.models.subjects import Subject
+from src.models.attendance import Attendance, AttendanceStatus
+from src.models.grades import Grade
+from src.models.disciplinary import DisciplinaryRecord
+from src.models.schedule import Schedule
+from src.models.assessment_events import AssessmentEvent
+from src.schemas.analytics import DashboardStats, GroupAnalytics, StudentAnalytics
 
 router = APIRouter(prefix="/analytics", tags=["Analytics"])
 

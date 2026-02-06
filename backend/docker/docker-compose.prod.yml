@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ../
+      dockerfile: Dockerfile.prod
+    container_name: military_journal_backend_prod
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql+asyncpg://postgres:postgres@db:5432/military_journal}
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=false
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-1440}
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000
+    depends_on:
+      - db
+    restart: always
+    networks:
+      - app_network
+
+  db:
+    image: postgres:15-alpine
+    container_name: military_journal_db_prod
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-military_journal}
+    restart: always
+    networks:
+      - app_network
+
+  nginx:
+    image: nginx:alpine
+    container_name: military_journal_nginx_prod
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/default.conf.template:/etc/nginx/templates/default.conf.template
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    environment:
+      - DOMAIN=${DOMAIN}
+    depends_on:
+      - backend
+    restart: always
+    networks:
+      - app_network
+
+  certbot:
+    image: certbot/certbot
+    container_name: military_journal_certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    # This command checks for certificates every 12 hours
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    networks:
+      - app_network
+
+volumes:
+  postgres_data_prod:
+
+networks:
+  app_network:

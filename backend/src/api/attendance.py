@@ -4,12 +4,12 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select, and_, func
 from sqlalchemy.orm import selectinload
 
-from backend.src.api.dependencies import SessionDep, TeacherUser, CurrentUser
-from backend.src.models.attendance import Attendance, AttendanceStatus
-from backend.src.models.schedule import Schedule
-from backend.src.models.students import Student
-from backend.src.models.users import UserRole
-from backend.src.schemas.attendance import (
+from src.api.dependencies import SessionDep, TeacherUser, CurrentUser
+from src.models.attendance import Attendance, AttendanceStatus
+from src.models.schedule import Schedule
+from src.models.students import Student
+from src.models.users import UserRole
+from src.schemas.attendance import (
     AttendanceCreate,
     AttendanceRead,
     AttendanceUpdate,
@@ -129,9 +129,9 @@ async def create_bulk_attendance_simple(
     Simplified bulk attendance marking by group (teachers and admins only).
     Automatically finds or creates a schedule for the given group and date.
     """
-    from backend.src.models.groups import Group
-    from backend.src.models.subjects import Subject
-    from backend.src.models.teachers import Teacher
+    from models.groups import Group
+    from models.subjects import Subject
+    from models.teachers import Teacher
     from datetime import time
     
     # Verify group exists

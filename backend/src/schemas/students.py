@@ -2,7 +2,7 @@ from datetime import datetime, date
 from pydantic import BaseModel, EmailStr, field_validator, model_validator
 from typing import Optional, Self
 
-from backend.src.schemas.groups import GroupRead
+from src.schemas.groups import GroupRead
 
 
 class StudentCreate(BaseModel):

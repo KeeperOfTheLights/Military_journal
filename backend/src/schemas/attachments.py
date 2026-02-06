@@ -6,7 +6,7 @@ from typing import Optional, List
 from pydantic import BaseModel, Field, field_validator, model_validator
 from typing import Self
 
-from backend.src.models.attachments import AttachmentType, AttachmentEntity
+from src.models.attachments import AttachmentType, AttachmentEntity
 
 
 class AttachmentCreate(BaseModel):

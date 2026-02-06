@@ -3,13 +3,13 @@ from sqlalchemy import String, Integer, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import List, TYPE_CHECKING
 
-from backend.src.database import Base
+from src.database import Base
 
 if TYPE_CHECKING:
-    from backend.src.models.students import Student
-    from backend.src.models.schedule import Schedule
-    from backend.src.models.assignments import Assignment
-    from backend.src.models.assessment_events import AssessmentEvent
+    from models.students import Student
+    from models.schedule import Schedule
+    from models.assignments import Assignment
+    from models.assessment_events import AssessmentEvent
 
 
 class Group(Base):

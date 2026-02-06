@@ -3,14 +3,14 @@ from sqlalchemy import String, Integer, DateTime, Date, ForeignKey, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import List, Optional, TYPE_CHECKING
 
-from backend.src.database import Base
+from src.database import Base
 
 if TYPE_CHECKING:
-    from backend.src.models.users import User
-    from backend.src.models.groups import Group
-    from backend.src.models.attendance import Attendance
-    from backend.src.models.grades import Grade
-    from backend.src.models.disciplinary import DisciplinaryRecord
+    from models.users import User
+    from models.groups import Group
+    from models.attendance import Attendance
+    from models.grades import Grade
+    from models.disciplinary import DisciplinaryRecord
 
 
 class Student(Base):

@@ -4,13 +4,13 @@ from sqlalchemy import String, Integer, DateTime, Date, Time, ForeignKey, Enum, 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import List, Optional, TYPE_CHECKING
 
-from backend.src.database import Base
+from src.database import Base
 
 if TYPE_CHECKING:
-    from backend.src.models.groups import Group
-    from backend.src.models.subjects import Subject
-    from backend.src.models.teachers import Teacher
-    from backend.src.models.attendance import Attendance
+    from models.groups import Group
+    from models.subjects import Subject
+    from models.teachers import Teacher
+    from models.attendance import Attendance
 
 
 class DayOfWeek(str, PyEnum):

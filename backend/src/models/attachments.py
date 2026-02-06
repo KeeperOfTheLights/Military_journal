@@ -8,12 +8,12 @@ from sqlalchemy import String, Integer, DateTime, ForeignKey, Text, Enum, func, 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import Optional, TYPE_CHECKING
 
-from backend.src.database import Base
+from src.database import Base
 
 if TYPE_CHECKING:
-    from backend.src.models.users import User
-    from backend.src.models.schedule import Schedule
-    from backend.src.models.assignments import Assignment
+    from models.users import User
+    from models.schedule import Schedule
+    from models.assignments import Assignment
 
 
 class AttachmentType(str, PyEnum):

@@ -2,8 +2,8 @@ from datetime import datetime, date
 from pydantic import BaseModel
 from typing import Optional, List
 
-from backend.src.models.attendance import AttendanceStatus
-from backend.src.schemas.students import StudentRead
+from src.models.attendance import AttendanceStatus
+from src.schemas.students import StudentRead
 
 
 class AttendanceCreate(BaseModel):

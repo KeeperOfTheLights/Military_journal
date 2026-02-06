@@ -1,21 +1,21 @@
 # Schemas package
-from backend.src.schemas.users import UserCreate, UserRead, UserLogin, UserUpdate, TokenResponse
-from backend.src.schemas.groups import GroupCreate, GroupRead, GroupUpdate
-from backend.src.schemas.subjects import SubjectCreate, SubjectRead, SubjectUpdate
-from backend.src.schemas.students import StudentCreate, StudentRead, StudentUpdate
-from backend.src.schemas.teachers import TeacherCreate, TeacherRead, TeacherUpdate
-from backend.src.schemas.schedule import ScheduleCreate, ScheduleRead, ScheduleUpdate
-from backend.src.schemas.attendance import AttendanceCreate, AttendanceRead, AttendanceUpdate, AttendanceBulkCreate
-from backend.src.schemas.grades import GradeCreate, GradeRead, GradeUpdate
-from backend.src.schemas.assignments import AssignmentCreate, AssignmentRead, AssignmentUpdate
-from backend.src.schemas.disciplinary import DisciplinaryCreate, DisciplinaryRead, DisciplinaryUpdate
-from backend.src.schemas.analytics import (
+from src.schemas.users import UserCreate, UserRead, UserLogin, UserUpdate, TokenResponse
+from src.schemas.groups import GroupCreate, GroupRead, GroupUpdate
+from src.schemas.subjects import SubjectCreate, SubjectRead, SubjectUpdate
+from src.schemas.students import StudentCreate, StudentRead, StudentUpdate
+from src.schemas.teachers import TeacherCreate, TeacherRead, TeacherUpdate
+from src.schemas.schedule import ScheduleCreate, ScheduleRead, ScheduleUpdate
+from src.schemas.attendance import AttendanceCreate, AttendanceRead, AttendanceUpdate, AttendanceBulkCreate
+from src.schemas.grades import GradeCreate, GradeRead, GradeUpdate
+from src.schemas.assignments import AssignmentCreate, AssignmentRead, AssignmentUpdate
+from src.schemas.disciplinary import DisciplinaryCreate, DisciplinaryRead, DisciplinaryUpdate
+from src.schemas.analytics import (
     AttendanceStats,
     GradeStats,
     StudentAnalytics,
     GroupAnalytics,
 )
-from backend.src.schemas.attachments import (
+from src.schemas.attachments import (
     AttachmentCreate,
     AttachmentRead,
     AttachmentUpdate,
@@ -23,7 +23,7 @@ from backend.src.schemas.attachments import (
     AttachmentListResponse,
     StorageInfoResponse,
 )
-from backend.src.schemas.errors import (
+from src.schemas.errors import (
     ErrorResponse,
     ErrorDetail,
     ValidationErrorResponse,

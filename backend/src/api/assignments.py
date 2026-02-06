@@ -4,14 +4,14 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from backend.src.api.dependencies import SessionDep, TeacherUser, CurrentUser
-from backend.src.models.assignments import Assignment
-from backend.src.models.subjects import Subject
-from backend.src.models.teachers import Teacher
-from backend.src.models.students import Student
-from backend.src.models.groups import Group
-from backend.src.models.users import UserRole
-from backend.src.schemas.assignments import AssignmentCreate, AssignmentRead, AssignmentUpdate
+from src.api.dependencies import SessionDep, TeacherUser, CurrentUser
+from src.models.assignments import Assignment
+from src.models.subjects import Subject
+from src.models.teachers import Teacher
+from src.models.students import Student
+from src.models.groups import Group
+from src.models.users import UserRole
+from src.schemas.assignments import AssignmentCreate, AssignmentRead, AssignmentUpdate
 
 router = APIRouter(prefix="/assignments", tags=["Assignments"])
 

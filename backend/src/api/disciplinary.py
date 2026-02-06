@@ -4,13 +4,13 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 
-from backend.src.api.dependencies import SessionDep, TeacherUser, CurrentUser
-from backend.src.models.disciplinary import DisciplinaryRecord, ViolationType, SeverityLevel
-from backend.src.models.students import Student
-from backend.src.models.groups import Group
-from backend.src.models.teachers import Teacher
-from backend.src.models.users import UserRole
-from backend.src.schemas.disciplinary import DisciplinaryCreate, DisciplinaryRead, DisciplinaryUpdate
+from src.api.dependencies import SessionDep, TeacherUser, CurrentUser
+from src.models.disciplinary import DisciplinaryRecord, ViolationType, SeverityLevel
+from src.models.students import Student
+from src.models.groups import Group
+from src.models.teachers import Teacher
+from src.models.users import UserRole
+from src.schemas.disciplinary import DisciplinaryCreate, DisciplinaryRead, DisciplinaryUpdate
 
 router = APIRouter(prefix="/disciplinary", tags=["Disciplinary Records"])
 

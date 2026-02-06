@@ -4,13 +4,13 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
-from backend.src.api.dependencies import SessionDep, CurrentUser
-from backend.src.models.users import User, UserRole
-from backend.src.models.students import Student
-from backend.src.models.teachers import Teacher
-from backend.src.models.groups import Group
-from backend.src.schemas.users import UserCreate, UserRead, UserLogin, TokenResponse
-from backend.src.security import hash_password, verify_password, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
+from src.api.dependencies import SessionDep, CurrentUser
+from src.models.users import User, UserRole
+from src.models.students import Student
+from src.models.teachers import Teacher
+from src.models.groups import Group
+from src.schemas.users import UserCreate, UserRead, UserLogin, TokenResponse
+from src.security import hash_password, verify_password, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 

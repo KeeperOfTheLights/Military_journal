@@ -3,14 +3,14 @@ from fastapi import APIRouter, HTTPException, status, Query
 from sqlalchemy import select, and_
 from sqlalchemy.orm import selectinload
 
-from backend.src.api.dependencies import SessionDep, TeacherUser, CurrentUser
-from backend.src.models.assessment_events import AssessmentEvent, AssessmentEventType
-from backend.src.models.grades import Grade
-from backend.src.models.groups import Group
-from backend.src.models.subjects import Subject
-from backend.src.models.students import Student
-from backend.src.schemas.assessment_events import AssessmentEventCreate, AssessmentEventRead, AssessmentEventUpdate
-from backend.src.schemas.grades import BulkGradeInput
+from src.api.dependencies import SessionDep, TeacherUser, CurrentUser
+from src.models.assessment_events import AssessmentEvent, AssessmentEventType
+from src.models.grades import Grade
+from src.models.groups import Group
+from src.models.subjects import Subject
+from src.models.students import Student
+from src.schemas.assessment_events import AssessmentEventCreate, AssessmentEventRead, AssessmentEventUpdate
+from src.schemas.grades import BulkGradeInput
 
 router = APIRouter(prefix="/assessment-events", tags=["Assessment Events"])
 

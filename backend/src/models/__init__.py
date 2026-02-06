@@ -1,16 +1,16 @@
 # Models package
-from backend.src.models.users import User
-from backend.src.models.groups import Group
-from backend.src.models.subjects import Subject
-from backend.src.models.students import Student
-from backend.src.models.teachers import Teacher
-from backend.src.models.schedule import Schedule
-from backend.src.models.attendance import Attendance
-from backend.src.models.grades import Grade
-from backend.src.models.assignments import Assignment
-from backend.src.models.disciplinary import DisciplinaryRecord
-from backend.src.models.attachments import Attachment, AttachmentType, AttachmentEntity
-from backend.src.models.assessment_events import AssessmentEvent, AssessmentEventType
+from src.models.users import User
+from src.models.groups import Group
+from src.models.subjects import Subject
+from src.models.students import Student
+from src.models.teachers import Teacher
+from src.models.schedule import Schedule
+from src.models.attendance import Attendance
+from src.models.grades import Grade
+from src.models.assignments import Assignment
+from src.models.disciplinary import DisciplinaryRecord
+from src.models.attachments import Attachment, AttachmentType, AttachmentEntity
+from src.models.assessment_events import AssessmentEvent, AssessmentEventType
 
 __all__ = [
     "User",

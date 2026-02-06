@@ -3,11 +3,11 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
-from backend.src.api.dependencies import SessionDep, AdminUser, CurrentUser
-from backend.src.models.users import User, UserRole
-from backend.src.models.teachers import Teacher
-from backend.src.schemas.teachers import TeacherCreate, TeacherRead, TeacherUpdate
-from backend.src.security import hash_password
+from src.api.dependencies import SessionDep, AdminUser, CurrentUser
+from src.models.users import User, UserRole
+from src.models.teachers import Teacher
+from src.schemas.teachers import TeacherCreate, TeacherRead, TeacherUpdate
+from src.security import hash_password
 
 router = APIRouter(prefix="/teachers", tags=["Teachers"])
 

@@ -3,11 +3,11 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from backend.src.api.dependencies import SessionDep, TeacherUser, CurrentUser
-from backend.src.models.grades import Grade
-from backend.src.models.assessment_events import AssessmentEvent
-from backend.src.models.students import Student
-from backend.src.schemas.grades import GradeCreate, GradeRead, GradeUpdate, BulkGradesCreate
+from src.api.dependencies import SessionDep, TeacherUser, CurrentUser
+from src.models.grades import Grade
+from src.models.assessment_events import AssessmentEvent
+from src.models.students import Student
+from src.schemas.grades import GradeCreate, GradeRead, GradeUpdate, BulkGradesCreate
 
 router = APIRouter(prefix="/grades", tags=["Grades"])
 

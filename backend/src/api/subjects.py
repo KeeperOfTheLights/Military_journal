@@ -2,9 +2,9 @@ from typing import List
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 
-from backend.src.api.dependencies import SessionDep, TeacherUser, CurrentUser
-from backend.src.models.subjects import Subject
-from backend.src.schemas.subjects import SubjectCreate, SubjectRead, SubjectUpdate
+from src.api.dependencies import SessionDep, TeacherUser, CurrentUser
+from src.models.subjects import Subject
+from src.schemas.subjects import SubjectCreate, SubjectRead, SubjectUpdate
 
 router = APIRouter(prefix="/subjects", tags=["Subjects"])
 

@@ -4,12 +4,12 @@ from sqlalchemy import String, Integer, DateTime, Date, ForeignKey, Enum, Text, 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import Optional, TYPE_CHECKING, List
 
-from backend.src.database import Base
+from src.database import Base
 
 if TYPE_CHECKING:
-    from backend.src.models.groups import Group
-    from backend.src.models.subjects import Subject
-    from backend.src.models.grades import Grade
+    from models.groups import Group
+    from models.subjects import Subject
+    from models.grades import Grade
 
 
 class AssessmentEventType(str, PyEnum):

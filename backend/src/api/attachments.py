@@ -9,19 +9,19 @@ from sqlalchemy import select, and_
 from sqlalchemy.orm import selectinload
 from datetime import datetime
 
-from backend.src.api.dependencies import SessionDep, CurrentUser, TeacherUser
-from backend.src.models.attachments import Attachment, AttachmentEntity, AttachmentType
-from backend.src.models.schedule import Schedule
-from backend.src.models.assignments import Assignment
-from backend.src.schemas.attachments import (
+from src.api.dependencies import SessionDep, CurrentUser, TeacherUser
+from src.models.attachments import Attachment, AttachmentEntity, AttachmentType
+from src.models.schedule import Schedule
+from src.models.assignments import Assignment
+from src.schemas.attachments import (
     AttachmentRead,
     AttachmentUpdate,
     AttachmentUploadResponse,
     AttachmentListResponse,
     StorageInfoResponse,
 )
-from backend.src.storage import Storage, get_storage, StoredFile
-from backend.src.exceptions import NotFoundError, InsufficientPermissionsError, ValidationError
+from src.storage import Storage, get_storage, StoredFile
+from src.exceptions import NotFoundError, InsufficientPermissionsError, ValidationError
 
 router = APIRouter(prefix="/attachments", tags=["Attachments"])
 

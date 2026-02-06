@@ -3,7 +3,7 @@ from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional
 import re
 
-from backend.src.models.users import UserRole
+from src.models.users import UserRole
 
 
 class UserCreate(BaseModel):

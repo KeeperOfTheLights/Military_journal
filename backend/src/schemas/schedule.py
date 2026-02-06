@@ -2,9 +2,9 @@ from datetime import datetime, time, date
 from pydantic import BaseModel, field_validator, model_validator
 from typing import Optional
 
-from backend.src.schemas.groups import GroupRead
-from backend.src.schemas.subjects import SubjectRead
-from backend.src.schemas.teachers import TeacherRead
+from src.schemas.groups import GroupRead
+from src.schemas.subjects import SubjectRead
+from src.schemas.teachers import TeacherRead
 
 
 class ScheduleCreate(BaseModel):

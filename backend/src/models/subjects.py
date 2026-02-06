@@ -3,12 +3,12 @@ from sqlalchemy import String, Integer, DateTime, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import List, Optional, TYPE_CHECKING
 
-from backend.src.database import Base
+from src.database import Base
 
 if TYPE_CHECKING:
-    from backend.src.models.schedule import Schedule
-    from backend.src.models.assignments import Assignment
-    from backend.src.models.assessment_events import AssessmentEvent
+    from models.schedule import Schedule
+    from models.assignments import Assignment
+    from models.assessment_events import AssessmentEvent
 
 
 class Subject(Base):

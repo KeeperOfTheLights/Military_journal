@@ -2,7 +2,7 @@ from datetime import datetime
 from pydantic import BaseModel, field_validator
 from typing import Optional
 
-from backend.src.schemas.students import StudentRead
+from src.schemas.students import StudentRead
 
 
 class GradeCreate(BaseModel):

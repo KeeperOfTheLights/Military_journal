@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import BinaryIO, Optional, Tuple
 from dataclasses import dataclass
 
-from backend.src.exceptions import StorageError, FileTooLargeError, InvalidFileTypeError
+from src.exceptions import StorageError, FileTooLargeError, InvalidFileTypeError
 
 
 @dataclass

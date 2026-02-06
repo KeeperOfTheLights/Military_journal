@@ -4,11 +4,11 @@ from sqlalchemy import String, DateTime, Date, ForeignKey, Enum, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import Optional, TYPE_CHECKING
 
-from backend.src.database import Base
+from src.database import Base
 
 if TYPE_CHECKING:
-    from backend.src.models.students import Student
-    from backend.src.models.schedule import Schedule
+    from models.students import Student
+    from models.schedule import Schedule
 
 
 class AttendanceStatus(str, PyEnum):

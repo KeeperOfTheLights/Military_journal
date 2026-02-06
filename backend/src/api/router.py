@@ -1,19 +1,19 @@
 from fastapi import APIRouter
 
-from backend.src.api.auth import router as auth_router
-from backend.src.api.users import router as users_router
-from backend.src.api.groups import router as groups_router
-from backend.src.api.subjects import router as subjects_router
-from backend.src.api.students import router as students_router
-from backend.src.api.teachers import router as teachers_router
-from backend.src.api.schedule import router as schedule_router
-from backend.src.api.attendance import router as attendance_router
-from backend.src.api.grades import router as grades_router
-from backend.src.api.assignments import router as assignments_router
-from backend.src.api.disciplinary import router as disciplinary_router
-from backend.src.api.analytics import router as analytics_router
-from backend.src.api.attachments import router as attachments_router
-from backend.src.api.assessment_events import router as assessment_events_router
+from src.api.auth import router as auth_router
+from src.api.users import router as users_router
+from src.api.groups import router as groups_router
+from src.api.subjects import router as subjects_router
+from src.api.students import router as students_router
+from src.api.teachers import router as teachers_router
+from src.api.schedule import router as schedule_router
+from src.api.attendance import router as attendance_router
+from src.api.grades import router as grades_router
+from src.api.assignments import router as assignments_router
+from src.api.disciplinary import router as disciplinary_router
+from src.api.analytics import router as analytics_router
+from src.api.attachments import router as attachments_router
+from src.api.assessment_events import router as assessment_events_router
 
 main_router = APIRouter()
 

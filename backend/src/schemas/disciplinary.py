@@ -2,9 +2,9 @@ from datetime import datetime, date
 from pydantic import BaseModel, field_validator, computed_field
 from typing import Optional
 
-from backend.src.models.disciplinary import ViolationType, SeverityLevel
-from backend.src.schemas.students import StudentRead
-from backend.src.schemas.teachers import TeacherRead
+from src.models.disciplinary import ViolationType, SeverityLevel
+from src.schemas.students import StudentRead
+from src.schemas.teachers import TeacherRead
 
 
 class DisciplinaryCreate(BaseModel):

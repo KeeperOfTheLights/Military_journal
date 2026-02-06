@@ -3,11 +3,11 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from backend.src.api.dependencies import SessionDep, TeacherUser, CurrentUser
-from backend.src.models.groups import Group
-from backend.src.models.students import Student
-from backend.src.schemas.groups import GroupCreate, GroupRead, GroupUpdate
-from backend.src.schemas.students import StudentRead
+from src.api.dependencies import SessionDep, TeacherUser, CurrentUser
+from src.models.groups import Group
+from src.models.students import Student
+from src.schemas.groups import GroupCreate, GroupRead, GroupUpdate
+from src.schemas.students import StudentRead
 
 router = APIRouter(prefix="/groups", tags=["Groups"])
 

@@ -5,9 +5,9 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from backend.src.database import get_db
-from backend.src.security import decode_access_token
-from backend.src.models.users import User, UserRole
+from src.database import get_db
+from src.security import decode_access_token
+from src.models.users import User, UserRole
 
 # Database session dependency
 SessionDep = Annotated[AsyncSession, Depends(get_db)]

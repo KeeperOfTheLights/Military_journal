@@ -2,7 +2,7 @@ from datetime import datetime, date
 from pydantic import BaseModel, field_validator
 from typing import Optional
 
-from backend.src.models.assessment_events import AssessmentEventType
+from src.models.assessment_events import AssessmentEventType
 
 
 class AssessmentEventCreate(BaseModel):

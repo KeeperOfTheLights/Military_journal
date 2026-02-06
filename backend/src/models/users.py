@@ -4,12 +4,12 @@ from sqlalchemy import String, DateTime, Enum, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import Optional, List, TYPE_CHECKING
 
-from backend.src.database import Base
+from src.database import Base
 
 if TYPE_CHECKING:
-    from backend.src.models.students import Student
-    from backend.src.models.teachers import Teacher
-    from backend.src.models.attachments import Attachment
+    from models.students import Student
+    from models.teachers import Teacher
+    from models.attachments import Attachment
 
 
 class UserRole(str, PyEnum):

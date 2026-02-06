@@ -4,12 +4,12 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import IntegrityError
 
-from backend.src.api.dependencies import SessionDep, TeacherUser, CurrentUser
-from backend.src.models.users import User, UserRole
-from backend.src.models.students import Student
-from backend.src.models.groups import Group
-from backend.src.schemas.students import StudentCreate, StudentRead, StudentUpdate
-from backend.src.security import hash_password
+from src.api.dependencies import SessionDep, TeacherUser, CurrentUser
+from src.models.users import User, UserRole
+from src.models.students import Student
+from src.models.groups import Group
+from src.schemas.students import StudentCreate, StudentRead, StudentUpdate
+from src.security import hash_password
 
 router = APIRouter(prefix="/students", tags=["Students"])
 

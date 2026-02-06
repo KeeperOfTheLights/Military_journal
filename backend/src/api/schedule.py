@@ -4,13 +4,13 @@ from fastapi import APIRouter, HTTPException, status, Query
 from sqlalchemy import select, and_, or_
 from sqlalchemy.orm import selectinload
 
-from backend.src.api.dependencies import SessionDep, TeacherUser, CurrentUser
-from backend.src.models.schedule import Schedule
-from backend.src.models.groups import Group
-from backend.src.models.subjects import Subject
-from backend.src.models.teachers import Teacher
-from backend.src.models.users import UserRole
-from backend.src.schemas.schedule import ScheduleCreate, ScheduleRead, ScheduleUpdate, MonthlyScheduleCreate
+from src.api.dependencies import SessionDep, TeacherUser, CurrentUser
+from src.models.schedule import Schedule
+from src.models.groups import Group
+from src.models.subjects import Subject
+from src.models.teachers import Teacher
+from src.models.users import UserRole
+from src.schemas.schedule import ScheduleCreate, ScheduleRead, ScheduleUpdate, MonthlyScheduleCreate
 
 router = APIRouter(prefix="/schedule", tags=["Schedule"])
 
@@ -174,7 +174,7 @@ async def get_my_schedule(
 
     if current_user.role == UserRole.STUDENT:
         # Get student's group schedule
-        from backend.src.models.students import Student
+        from models.students import Student
         student_result = await session.execute(
             select(Student).where(Student.user_id == current_user.id)
         )

@@ -3,11 +3,11 @@ from sqlalchemy import Integer, DateTime, ForeignKey, Float, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import Optional, TYPE_CHECKING
 
-from backend.src.database import Base
+from src.database import Base
 
 if TYPE_CHECKING:
-    from backend.src.models.students import Student
-    from backend.src.models.assessment_events import AssessmentEvent
+    from models.students import Student
+    from models.assessment_events import AssessmentEvent
 
 
 class Grade(Base):

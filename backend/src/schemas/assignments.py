@@ -2,9 +2,9 @@ from datetime import datetime, date
 from pydantic import BaseModel, field_validator
 from typing import Optional
 
-from backend.src.schemas.subjects import SubjectRead
-from backend.src.schemas.teachers import TeacherRead
-from backend.src.schemas.groups import GroupRead
+from src.schemas.subjects import SubjectRead
+from src.schemas.teachers import TeacherRead
+from src.schemas.groups import GroupRead
 
 
 class AssignmentCreate(BaseModel):
