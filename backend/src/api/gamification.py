@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, status, UploadFile, File, Depends
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from src.api.dependencies import SessionDep, CurrentUser, TeacherUser
+from src.api.dependencies import SessionDep, CurrentUser
 from src.models.gamification import MapBoard, TopographicSymbol, SymbolRenderType
 from src.models.attachments import Attachment, AttachmentEntity
 from src.schemas.gamification import (
@@ -147,6 +147,13 @@ async def update_map_board(
             select(TopographicSymbol).where(TopographicSymbol.id.in_(map_board_update.symbol_ids))
         )
         symbols = symbols_result.scalars().all()
+        found_ids = {s.id for s in symbols}
+        missing = set(map_board_update.symbol_ids) - found_ids
+        if missing:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid symbol IDs: {sorted(missing)}"
+            )
         map_board.symbols = symbols
 
     await session.commit()
@@ -225,6 +232,13 @@ async def create_symbol(
     Create a new symbol (JSON).
     Use this for EDITOR type symbols.
     """
+    if symbol_data.render_type == SymbolRenderType.EDITOR and symbol_data.canvas_id:
+        canvas = await session.get(Canvas, symbol_data.canvas_id)
+        if not canvas:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Canvas not found"
+            )
     new_symbol = TopographicSymbol(**symbol_data.model_dump())
     session.add(new_symbol)
     await session.commit()

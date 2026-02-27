@@ -3,8 +3,10 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 
 from src.api.dependencies import SessionDep, CurrentUser
+from src.models.attachments import Attachment, AttachmentType
 from src.models.canvas import Canvas
 from src.models.gamification import TopographicSymbol
+from src.models.users import UserRole
 from src.schemas.canvas import (
     CanvasCreate, CanvasRead, CanvasUpdate, 
     CanvasContent, CanvasObjectType
@@ -83,7 +85,7 @@ async def update_canvas(
         )
         
     # Permission check (optional: only creator or admin)
-    if canvas.creator_id != current_user.id and current_user.role != "admin": # assuming role exists on user model
+    if canvas.creator_id != current_user.id and current_user.role != UserRole.ADMIN:
          raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to update this canvas"
@@ -118,7 +120,7 @@ async def delete_canvas(
         )
     
      # Permission check
-    if canvas.creator_id != current_user.id and current_user.role != "admin":
+    if canvas.creator_id != current_user.id and current_user.role != UserRole.ADMIN:
          raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to delete this canvas"
@@ -152,9 +154,11 @@ async def load_canvas_content(
     try:
         # Content is stored as string in DB, parse it
         return CanvasContent.model_validate_json(canvas.content)
-    except Exception:
-        # Fallback if parsing fails or legacy format
-        return CanvasContent()
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Canvas content is corrupt or incompatible: {exc}",
+        )
 
 
 @router.post("/{canvas_id}/save-content", response_model=CanvasContent)
@@ -177,28 +181,49 @@ async def save_canvas_content(
         )
     
     # Permission check or logic if needed (e.g. check creator)
-    if canvas.creator_id != current_user.id and current_user.role != "admin": # assuming role exists
+    if canvas.creator_id != current_user.id and current_user.role != UserRole.ADMIN:
          raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to update this canvas"
         )
 
     # --- Validation Logic ---
+    image_ids = set()
     symbol_ids = set()
     for obj in content_data.objects:
+        if obj.type == CanvasObjectType.IMAGE:
+            image_ids.add(obj.fields.image_id)
         if obj.type == CanvasObjectType.SYMBOL:
             symbol_ids.add(obj.fields.symbol_id)
+
+    if image_ids:
+        img_result = await session.execute(
+            select(Attachment.id).where(
+                Attachment.id.in_(image_ids),
+                Attachment.attachment_type == AttachmentType.IMAGE,
+                Attachment.deleted_at.is_(None),
+            )
+        )
+        existing_ids = set(img_result.scalars().all())
+
+        missing_ids = image_ids - existing_ids
+        if missing_ids:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid image IDs: {sorted(missing_ids)}"
+            )
     
     if symbol_ids:
-        query = select(TopographicSymbol.id).where(TopographicSymbol.id.in_(symbol_ids))
-        result = await session.execute(query)
-        existing_ids = set(result.scalars().all())
+        sym_result = await session.execute(
+            select(TopographicSymbol.id).where(TopographicSymbol.id.in_(symbol_ids))
+        )
+        existing_ids = set(sym_result.scalars().all())
         
         missing_ids = symbol_ids - existing_ids
         if missing_ids:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid symbol IDs: {missing_ids}"
+                detail=f"Invalid symbol IDs: {sorted(missing_ids)}"
             )
 
     # Save as JSON string

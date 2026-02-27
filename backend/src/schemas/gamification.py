@@ -1,5 +1,5 @@
 from typing import Optional, List
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from src.models.gamification import SymbolRenderType
 
 from src.schemas.attachments import AttachmentRead
@@ -25,6 +25,12 @@ class TopographicSymbolUpdate(BaseModel):
     description: Optional[str] = None
     render_type: Optional[SymbolRenderType] = None
     canvas_id: Optional[int] = None
+
+    @model_validator(mode='after')
+    def validate_editor_requires_canvas(self):
+        if self.render_type == SymbolRenderType.EDITOR and self.canvas_id is None:
+            raise ValueError("canvas_id is required when render_type is EDITOR")
+        return self
 
 class TopographicSymbolRead(TopographicSymbolBase):
     id: int
