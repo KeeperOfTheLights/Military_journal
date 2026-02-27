@@ -1,6 +1,5 @@
-'use client';
-
 import AuthGuard from "@/components/auth/AuthGuard";
+import TokenExpirationWarning from "@/components/TokenExpirationWarning";
 
 export default function AuthorizedLayout({
     children,
@@ -10,6 +9,7 @@ export default function AuthorizedLayout({
     return (
         <AuthGuard>
             {children}
+            <TokenExpirationWarning />
         </AuthGuard>
     );
 }

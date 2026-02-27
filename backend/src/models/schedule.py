@@ -7,10 +7,10 @@ from typing import List, Optional, TYPE_CHECKING
 from src.database import Base
 
 if TYPE_CHECKING:
-    from models.groups import Group
-    from models.subjects import Subject
-    from models.teachers import Teacher
-    from models.attendance import Attendance
+    from src.models.groups import Group
+    from src.models.subjects import Subject
+    from src.models.teachers import Teacher
+    from src.models.attendance import Attendance
 
 
 class DayOfWeek(str, PyEnum):

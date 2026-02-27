@@ -6,9 +6,9 @@ from typing import Optional, TYPE_CHECKING
 from src.database import Base
 
 if TYPE_CHECKING:
-    from models.subjects import Subject
-    from models.teachers import Teacher
-    from models.groups import Group
+    from src.models.subjects import Subject
+    from src.models.teachers import Teacher
+    from src.models.groups import Group
 
 
 class Assignment(Base):

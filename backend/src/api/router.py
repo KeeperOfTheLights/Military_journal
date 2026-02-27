@@ -14,6 +14,8 @@ from src.api.disciplinary import router as disciplinary_router
 from src.api.analytics import router as analytics_router
 from src.api.attachments import router as attachments_router
 from src.api.assessment_events import router as assessment_events_router
+from src.api.canvas import router as canvas_router
+from src.api.gamification import router as gamification_router
 
 main_router = APIRouter()
 
@@ -32,3 +34,5 @@ main_router.include_router(disciplinary_router, prefix="/api")
 main_router.include_router(analytics_router, prefix="/api")
 main_router.include_router(attachments_router, prefix="/api")
 main_router.include_router(assessment_events_router, prefix="/api")
+main_router.include_router(canvas_router, prefix="/api")
+main_router.include_router(gamification_router, prefix="/api")

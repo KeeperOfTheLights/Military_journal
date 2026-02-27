@@ -6,10 +6,10 @@ from typing import List, Optional, TYPE_CHECKING
 from src.database import Base
 
 if TYPE_CHECKING:
-    from models.users import User
-    from models.schedule import Schedule
-    from models.assignments import Assignment
-    from models.disciplinary import DisciplinaryRecord
+    from src.models.users import User
+    from src.models.schedule import Schedule
+    from src.models.assignments import Assignment
+    from src.models.disciplinary import DisciplinaryRecord
 
 
 class Teacher(Base):

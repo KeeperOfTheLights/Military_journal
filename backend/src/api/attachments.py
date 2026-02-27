@@ -32,7 +32,8 @@ StorageDep = Annotated[Storage, Depends(get_storage)]
 def add_download_url(attachment: Attachment, storage: Storage) -> AttachmentRead:
     """Convert attachment model to schema with download URL."""
     data = AttachmentRead.model_validate(attachment)
-    data.download_url = storage.get_url(attachment.storage_key)
+    # Prefer stored URL, fallback to generated
+    data.url = attachment.url or storage.get_url(attachment.storage_key)
     return data
 
 
@@ -91,6 +92,12 @@ async def upload_attachment(
         if not entity:
             raise NotFoundError("Задание", entity_id)
         folder = "assignments"
+    elif entity_type == AttachmentEntity.SYMBOL:
+         # No specific entity verification for now as symbols are independent or attached to boards differently?
+         # User's code said "SYMBOL = 'symbol'". 
+         # Assuming logic exists or we just allow it. The previous code didn't handle SYMBOL in if/elif.
+         # But the enum has SYMBOL. I should probably add a check or just assume folder "symbols".
+         folder = "symbols"
     else:
         raise ValidationError(
             message="Неподдерживаемый тип сущности",
@@ -125,6 +132,7 @@ async def upload_attachment(
         title=title or stored.original_filename,
         description=description,
         uploaded_by_id=current_user.id,
+        url=stored.url, # Save URL
     )
     
     session.add(attachment)

@@ -1,10 +1,14 @@
 from typing import List
 from datetime import date, timedelta
-from fastapi import APIRouter, HTTPException, status, Query
+from fastapi import APIRouter, status, Query
 from sqlalchemy import select, and_, or_
 from sqlalchemy.orm import selectinload
 
 from src.api.dependencies import SessionDep, TeacherUser, CurrentUser
+from src.exceptions import (
+    NotFoundError,
+    BusinessLogicError,
+)
 from src.models.schedule import Schedule
 from src.models.groups import Group
 from src.models.subjects import Subject
@@ -29,21 +33,21 @@ async def create_schedule(
         select(Group).where(Group.id == schedule_data.group_id)
     )
     if not group_result.scalar_one_or_none():
-        raise HTTPException(status_code=404, detail="Group not found")
+        raise NotFoundError(resource="Group", resource_id=schedule_data.group_id)
 
     # Verify subject exists
     subject_result = await session.execute(
         select(Subject).where(Subject.id == schedule_data.subject_id)
     )
     if not subject_result.scalar_one_or_none():
-        raise HTTPException(status_code=404, detail="Subject not found")
+        raise NotFoundError(resource="Subject", resource_id=schedule_data.subject_id)
 
     # Verify teacher exists
     teacher_result = await session.execute(
         select(Teacher).where(Teacher.id == schedule_data.teacher_id)
     )
     if not teacher_result.scalar_one_or_none():
-        raise HTTPException(status_code=404, detail="Teacher not found")
+        raise NotFoundError(resource="Teacher", resource_id=schedule_data.teacher_id)
 
     # Check for time conflicts on the same date
     conflict_result = await session.execute(
@@ -59,9 +63,9 @@ async def create_schedule(
         )
     )
     if conflict_result.scalar_one_or_none():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Schedule conflict: this time slot is already occupied"
+        raise BusinessLogicError(
+            code="SCHEDULE_CONFLICT",
+            message="Конфликт расписания: это время уже занято"
         )
 
     new_schedule = Schedule(**schedule_data.model_dump())
@@ -174,13 +178,13 @@ async def get_my_schedule(
 
     if current_user.role == UserRole.STUDENT:
         # Get student's group schedule
-        from models.students import Student
+        from src.models.students import Student
         student_result = await session.execute(
             select(Student).where(Student.user_id == current_user.id)
         )
         student = student_result.scalar_one_or_none()
         if not student:
-            raise HTTPException(status_code=404, detail="Student profile not found")
+            raise NotFoundError(resource="Student profile")
         query = query.where(Schedule.group_id == student.group_id)
 
     elif current_user.role == UserRole.TEACHER:
@@ -190,7 +194,7 @@ async def get_my_schedule(
         )
         teacher = teacher_result.scalar_one_or_none()
         if not teacher:
-            raise HTTPException(status_code=404, detail="Teacher profile not found")
+            raise NotFoundError(resource="Teacher profile")
         query = query.where(Schedule.teacher_id == teacher.id)
 
     if academic_year:
@@ -223,7 +227,7 @@ async def get_schedule_by_date_range(
         date_from_parsed = datetime.strptime(date_from, "%Y-%m-%d").date()
         date_to_parsed = datetime.strptime(date_to, "%Y-%m-%d").date()
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
+        raise BusinessLogicError(code="INVALID_DATE", message="Неверный формат даты. Используйте ГГГГ-ММ-ДД")
     
     query = select(Schedule).options(
         selectinload(Schedule.group),
@@ -262,7 +266,7 @@ async def get_schedule(
     schedule = result.scalar_one_or_none()
 
     if not schedule:
-        raise HTTPException(status_code=404, detail="Schedule not found")
+        raise NotFoundError(resource="Schedule", resource_id=schedule_id)
 
     return ScheduleRead.model_validate(schedule)
 
@@ -289,7 +293,7 @@ async def update_schedule(
     schedule = result.scalar_one_or_none()
 
     if not schedule:
-        raise HTTPException(status_code=404, detail="Schedule not found")
+        raise NotFoundError(resource="Schedule", resource_id=schedule_id)
 
     update_data = schedule_update.model_dump(exclude_unset=True)
     for field, value in update_data.items():
@@ -314,7 +318,7 @@ async def delete_schedule(
     schedule = result.scalar_one_or_none()
 
     if not schedule:
-        raise HTTPException(status_code=404, detail="Schedule not found")
+        raise NotFoundError(resource="Schedule", resource_id=schedule_id)
 
     await session.delete(schedule)
     await session.commit()
@@ -348,7 +352,7 @@ async def copy_week_schedule(
     source_schedules = source_schedules_result.scalars().all()
     
     if not source_schedules:
-        raise HTTPException(status_code=404, detail="No schedules found in source week")
+        raise NotFoundError(resource="Source schedules")
     
     # Calculate day offset
     target_week_start = target_date - timedelta(days=target_date.weekday())
@@ -412,7 +416,7 @@ async def create_monthly_schedule(
     # Verify group exists
     group_result = await session.execute(select(Group).where(Group.id == monthly_data.group_id))
     if not group_result.scalar_one_or_none():
-        raise HTTPException(status_code=404, detail=f"Group {monthly_data.group_id} not found")
+        raise NotFoundError(resource="Group", resource_id=monthly_data.group_id)
     
     created_count = 0
     skipped_count = 0

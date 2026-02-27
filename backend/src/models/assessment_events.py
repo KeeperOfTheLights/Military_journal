@@ -7,9 +7,9 @@ from typing import Optional, TYPE_CHECKING, List
 from src.database import Base
 
 if TYPE_CHECKING:
-    from models.groups import Group
-    from models.subjects import Subject
-    from models.grades import Grade
+    from src.models.groups import Group
+    from src.models.subjects import Subject
+    from src.models.grades import Grade
 
 
 class AssessmentEventType(str, PyEnum):

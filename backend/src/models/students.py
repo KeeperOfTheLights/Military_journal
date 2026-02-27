@@ -6,11 +6,11 @@ from typing import List, Optional, TYPE_CHECKING
 from src.database import Base
 
 if TYPE_CHECKING:
-    from models.users import User
-    from models.groups import Group
-    from models.attendance import Attendance
-    from models.grades import Grade
-    from models.disciplinary import DisciplinaryRecord
+    from src.models.users import User
+    from src.models.groups import Group
+    from src.models.attendance import Attendance
+    from src.models.grades import Grade
+    from src.models.disciplinary import DisciplinaryRecord
 
 
 class Student(Base):

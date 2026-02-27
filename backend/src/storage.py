@@ -47,6 +47,7 @@ class StorageConfig:
     
     # Local storage settings
     local_storage_path: str = "uploads"
+    base_url: str = "http://127.0.0.1:8000"  # Server base URL for absolute URLs
     
     # S3 settings (set via environment variables)
     s3_bucket: Optional[str] = None
@@ -61,6 +62,7 @@ class StorageConfig:
         return cls(
             max_file_size_mb=int(os.getenv("MAX_FILE_SIZE_MB", "50")),
             local_storage_path=os.getenv("LOCAL_STORAGE_PATH", "uploads"),
+            base_url=os.getenv("BASE_URL", "http://127.0.0.1:8000"),
             s3_bucket=os.getenv("AWS_S3_BUCKET"),
             s3_region=os.getenv("AWS_REGION", "us-east-1"),
             s3_access_key=os.getenv("AWS_ACCESS_KEY_ID"),
@@ -207,7 +209,7 @@ class LocalStorageBackend(StorageBackend):
             size=size,
             checksum=checksum,
             storage_backend="local",
-            url=f"/files/{key}",
+            url=f"{self.config.base_url.rstrip('/')}/media/{key}",
         )
     
     async def get(self, key: str) -> Tuple[BinaryIO, str]:
@@ -245,8 +247,8 @@ class LocalStorageBackend(StorageBackend):
         return (self.base_path / key).exists()
     
     def get_url(self, key: str, expires_in: int = 3600) -> Optional[str]:
-        """Get URL for local file."""
-        return f"/api/files/{key}"
+        """Get absolute URL for local file."""
+        return f"{self.config.base_url.rstrip('/')}/media/{key}"
 
 
 class S3StorageBackend(StorageBackend):

@@ -9,7 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Shield, Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle, User, Phone, Users } from 'lucide-react';
 import '@/styles/Auth.css';
-import { useListGroupsApiGroupsGet } from '@/api/client/groups/groups';
+import { useListGroupsApiGroupsGet } from '@/api/orval/client/groups/groups';
 
 const registerSchema = z.object({
   first_name: z.string().min(1, 'Введите имя'),

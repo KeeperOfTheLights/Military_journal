@@ -4,12 +4,12 @@ export default defineConfig({
     militaryJournal: {
         output: {
             mode: 'tags-split',
-            schemas: 'src/api/client/model',
+            schemas: 'src/api/orval/client/model',
             client: 'react-query',
-            target: 'src/api/client/militaryJournal.ts',
+            target: 'src/api/orval/client/militaryJournal.ts',
             override: {
                 mutator: {
-                    path: 'src/api/custom-instance.ts',
+                    path: 'src/api/orval/custom-instance.ts',
                     name: 'customInstance',
                 },
             },

@@ -1,10 +1,17 @@
 from datetime import timedelta, date
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, status
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from src.api.dependencies import SessionDep, CurrentUser
+from src.exceptions import (
+    AlreadyExistsError,
+    InvalidCredentialsError,
+    AuthorizationError,
+    BusinessLogicError,
+    NotFoundError,
+)
 from src.models.users import User, UserRole
 from src.models.students import Student
 from src.models.teachers import Teacher
@@ -26,10 +33,7 @@ async def register(user_data: UserCreate, session: SessionDep):
         select(User).where(User.email == user_data.email.lower())
     )
     if result.scalar_one_or_none():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
-        )
+        raise AlreadyExistsError(resource="User", field="email", value=user_data.email)
 
     # Create new user
     try:
@@ -50,10 +54,7 @@ async def register(user_data: UserCreate, session: SessionDep):
                 default_group = result.scalar_one_or_none()
                 if not default_group:
                     await session.rollback()
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="No groups available. Please contact administrator."
-                    )
+                    raise NotFoundError(resource="Group", resource_id="Any")
                 group_id = default_group.id
             else:
                 # Verify group exists
@@ -62,10 +63,7 @@ async def register(user_data: UserCreate, session: SessionDep):
                 )
                 if not result.scalar_one_or_none():
                     await session.rollback()
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="Selected group does not exist"
-                    )
+                    raise NotFoundError(resource="Group", resource_id=user_data.group_id)
                 group_id = user_data.group_id
             
             student = Student(
@@ -105,10 +103,7 @@ async def register(user_data: UserCreate, session: SessionDep):
 
     except IntegrityError:
         await session.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Registration failed"
-        )
+        raise BusinessLogicError(code="REGISTRATION_FAILED", message="Ошибка регистрации")
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -123,16 +118,12 @@ async def login(credentials: UserLogin, session: SessionDep):
     user = result.scalar_one_or_none()
 
     if not user or not verify_password(credentials.password, user.password_hash):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise InvalidCredentialsError()
 
     if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User account is deactivated"
+        raise AuthorizationError(
+            code="ACCOUNT_DEACTIVATED",
+            message="Ваш аккаунт деактивирован. Обратитесь к администратору"
         )
 
     # Create access token - sub must be a string
@@ -184,15 +175,12 @@ async def change_password(
     Change user password.
     """
     if not verify_password(old_password, current_user.password_hash):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Incorrect current password"
-        )
+        raise InvalidCredentialsError()
 
     if len(new_password) < 8:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="New password must be at least 8 characters"
+        raise BusinessLogicError(
+            code="INVALID_PASSWORD",
+            message="Пароль должен содержать минимум 8 символов"
         )
 
     current_user.password_hash = hash_password(new_password)

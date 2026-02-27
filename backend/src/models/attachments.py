@@ -11,9 +11,9 @@ from typing import Optional, TYPE_CHECKING
 from src.database import Base
 
 if TYPE_CHECKING:
-    from models.users import User
-    from models.schedule import Schedule
-    from models.assignments import Assignment
+    from src.models.users import User
+    from src.models.schedule import Schedule
+    from src.models.assignments import Assignment
 
 
 class AttachmentType(str, PyEnum):
@@ -33,6 +33,7 @@ class AttachmentEntity(str, PyEnum):
     """
     SCHEDULE = "schedule"       # Lesson materials
     ASSIGNMENT = "assignment"   # Assignment files
+    SYMBOL = "symbol"           # Map board symbols
     # Future extensibility:
     # STUDENT = "student"       # Student documents
     # TEACHER = "teacher"       # Teacher documents
@@ -107,6 +108,11 @@ class Attachment(Base):
         String(255),
         nullable=True,
         comment="Display title (if different from filename)"
+    )
+    url: Mapped[Optional[str]] = mapped_column(
+        String(500),
+        nullable=True,
+        comment="Public URL for the attachment"
     )
     description: Mapped[Optional[str]] = mapped_column(
         Text,

@@ -44,19 +44,8 @@ if database_url:
 
 # Import Base and all models for autogenerate support
 try:
-    from src.database import Base
-    from src.models import (
-        User,
-        Group,
-        Subject,
-        Student,
-        Teacher,
-        Schedule,
-        Attendance,
-        Grade,
-        Assignment,
-        DisciplinaryRecord,
-    )
+    # Import Base from src.models which imports all models
+    from src.models import Base
     target_metadata = Base.metadata
 except ImportError as e:
     print(f"Error importing models: {e}")

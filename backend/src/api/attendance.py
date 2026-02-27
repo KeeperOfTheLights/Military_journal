@@ -129,9 +129,9 @@ async def create_bulk_attendance_simple(
     Simplified bulk attendance marking by group (teachers and admins only).
     Automatically finds or creates a schedule for the given group and date.
     """
-    from models.groups import Group
-    from models.subjects import Subject
-    from models.teachers import Teacher
+    from src.models.groups import Group
+    from src.models.subjects import Subject
+    from src.models.teachers import Teacher
     from datetime import time
     
     # Verify group exists

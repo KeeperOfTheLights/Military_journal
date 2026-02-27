@@ -7,9 +7,9 @@ from typing import Optional, List, TYPE_CHECKING
 from src.database import Base
 
 if TYPE_CHECKING:
-    from models.students import Student
-    from models.teachers import Teacher
-    from models.attachments import Attachment
+    from src.models.students import Student
+    from src.models.teachers import Teacher
+    from src.models.attachments import Attachment
 
 
 class UserRole(str, PyEnum):

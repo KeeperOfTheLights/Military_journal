@@ -1,19 +1,23 @@
 import os
+import logging
+import traceback
 from typing import Any
 
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from fastapi.exceptions import RequestValidationError
+from fastapi.exceptions import RequestValidationError, ResponseValidationError
 from fastapi.security import HTTPBearer
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from pydantic import ValidationError as PydanticValidationError
-
+from fastapi import HTTPException
 from src.api.router import main_router
 from src.exceptions import APIError, RateLimitError
 from src.schemas.errors import ErrorResponse
+
+logger = logging.getLogger("uvicorn.error")
 
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -77,34 +81,6 @@ tags_metadata = [
 # Create FastAPI app with enhanced OpenAPI documentation
 app = FastAPI(
     title="Military Journal API",
-    description="""
-## Электронный журнал для Военной кафедры КазУТБ
-
-### Возможности API:
-- 🔐 **Аутентификация** - JWT токены, регистрация, авторизация
-- 👥 **Управление пользователями** - курсанты, преподаватели, администраторы
-- 📚 **Учебный процесс** - расписание, посещаемость, оценки
-- 📎 **Файлы** - загрузка материалов к занятиям
-- 📊 **Аналитика** - статистика успеваемости
-
-### Аутентификация:
-Все защищённые эндпоинты требуют JWT токен в заголовке:
-```
-Authorization: Bearer <token>
-```
-
-### Формат ошибок:
-Все ошибки возвращаются в стандартном формате:
-```json
-{
-    "error": {
-        "code": "ERROR_CODE",
-        "message": "Описание ошибки",
-        "details": [...]
-    }
-}
-```
-    """,
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
@@ -134,9 +110,50 @@ app.state.limiter = limiter
 @app.exception_handler(APIError)
 async def api_error_handler(request: Request, exc: APIError) -> JSONResponse:
     """Handle custom API errors with standardized format."""
+    # APIError already has the correct format in exc.detail
     return JSONResponse(
         status_code=exc.status_code,
         content=exc.detail,
+        headers=exc.headers,
+    )
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    """
+    Handle standard FastAPI HTTPExceptions.
+    Wraps them into our standardized error format.
+    """
+    # If detail is already a dict with "error" key, return as is
+    if isinstance(exc.detail, dict) and "error" in exc.detail:
+        return JSONResponse(
+            status_code=exc.status_code,
+            content=exc.detail,
+            headers=exc.headers,
+        )
+
+    # Map status codes to machine-readable codes
+    code_map = {
+        400: "BAD_REQUEST",
+        401: "AUTHENTICATION_ERROR",
+        403: "FORBIDDEN",
+        404: "NOT_FOUND",
+        405: "METHOD_NOT_ALLOWED",
+        409: "CONFLICT",
+        429: "RATE_LIMIT_EXCEEDED",
+    }
+    
+    error_code = code_map.get(exc.status_code, "ERROR")
+    
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": {
+                "code": error_code,
+                "message": exc.detail if isinstance(exc.detail, str) else str(exc.detail),
+                "details": None,
+            }
+        },
         headers=exc.headers,
     )
 
@@ -192,17 +209,36 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded) -> JSONRe
     )
 
 
+@app.exception_handler(ResponseValidationError)
+async def response_validation_error_handler(request: Request, exc: ResponseValidationError) -> JSONResponse:
+    """
+    Handle response validation errors (e.g. schema mismatch in response).
+    These are normally swallowed by FastAPI with no logging.
+    """
+    logger.error(f"Response validation error on {request.method} {request.url}: {exc}")
+    logger.error(traceback.format_exc())
+    
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "error": {
+                "code": "RESPONSE_VALIDATION_ERROR",
+                "message": str(exc),
+                "details": None,
+            }
+        },
+    )
+
+
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """
     Handle unexpected exceptions.
     In production, this hides internal details.
     """
-    import traceback
-    
     # Log the full error for debugging
-    print(f"Unexpected error: {exc}")
-    traceback.print_exc()
+    logger.error(f"Unexpected error on {request.method} {request.url}: {exc}")
+    logger.error(traceback.format_exc())
     
     # In development, show more details
     is_debug = os.getenv("DEBUG", "false").lower() == "true"
@@ -255,6 +291,29 @@ app.add_middleware(
 
 # Include routers
 app.include_router(main_router)
+
+# Serve uploaded files at /media (as a regular route so CORS middleware applies)
+import os as _os
+from pathlib import Path as _Path
+from fastapi.responses import FileResponse
+
+_uploads_dir = _Path(_os.getenv("LOCAL_STORAGE_PATH", "uploads")).resolve()
+_uploads_dir.mkdir(parents=True, exist_ok=True)
+
+
+@app.get("/media/{file_path:path}")
+async def serve_media(file_path: str):
+    """Serve uploaded media files with CORS support."""
+    full_path = (_uploads_dir / file_path).resolve()
+    # Security: ensure the path is within uploads directory
+    if not str(full_path).startswith(str(_uploads_dir)):
+        raise HTTPException(status_code=403, detail="Access denied")
+    if not full_path.exists() or not full_path.is_file():
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    import mimetypes
+    content_type, _ = mimetypes.guess_type(str(full_path))
+    return FileResponse(full_path, media_type=content_type or "application/octet-stream")
 
 
 @app.get("/")

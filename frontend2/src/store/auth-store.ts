@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { loginApiAuthLoginPost, registerApiAuthRegisterPost, getCurrentUserInfoApiAuthMeGet } from '@/api/client/authentication/authentication';
-import { UserRead, UserLogin, UserCreate } from '@/api/client/model';
+import { loginApiAuthLoginPost, registerApiAuthRegisterPost, getCurrentUserInfoApiAuthMeGet } from '@/api/orval/client/authentication/authentication';
+import { UserRead, UserLogin, UserCreate } from '@/api/orval/client/model';
 import { z } from 'zod';
 
 const userSchema = z.object({

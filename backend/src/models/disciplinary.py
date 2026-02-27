@@ -7,8 +7,8 @@ from typing import Optional, TYPE_CHECKING
 from src.database import Base
 
 if TYPE_CHECKING:
-    from models.students import Student
-    from models.teachers import Teacher
+    from src.models.students import Student
+    from src.models.teachers import Teacher
 
 
 class ViolationType(str, PyEnum):

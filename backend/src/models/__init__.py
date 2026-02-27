@@ -1,5 +1,6 @@
 # Models package
-from src.models.users import User
+from src.database import Base
+from src.models.users import User, UserRole
 from src.models.groups import Group
 from src.models.subjects import Subject
 from src.models.students import Student
@@ -11,9 +12,13 @@ from src.models.assignments import Assignment
 from src.models.disciplinary import DisciplinaryRecord
 from src.models.attachments import Attachment, AttachmentType, AttachmentEntity
 from src.models.assessment_events import AssessmentEvent, AssessmentEventType
+from src.models.canvas import Canvas, CanvasEngineType
+from src.models.gamification import MapBoard, TopographicSymbol, SymbolRenderType
 
 __all__ = [
+    "Base",
     "User",
+    "UserRole",
     "Group",
     "Subject",
     "Student",
@@ -28,6 +33,11 @@ __all__ = [
     "AttachmentEntity",
     "AssessmentEvent",
     "AssessmentEventType",
+    "Canvas",
+    "CanvasEngineType",
+    "MapBoard",
+    "TopographicSymbol",
+    "SymbolRenderType",
 ]
 
 

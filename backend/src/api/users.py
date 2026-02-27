@@ -1,9 +1,10 @@
 from typing import List
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, status
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.api.dependencies import SessionDep, AdminUser, CurrentUser
+from src.exceptions import NotFoundError, AuthorizationError
 from src.models.users import User, UserRole
 from src.schemas.users import UserRead, UserUpdate
 from src.security import hash_password
@@ -39,10 +40,7 @@ async def get_user(user_id: int, session: SessionDep, current_user: CurrentUser)
     """
     # Users can only view their own profile unless admin
     if current_user.role != UserRole.ADMIN and current_user.id != user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied"
-        )
+        raise AuthorizationError()
 
     result = await session.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()

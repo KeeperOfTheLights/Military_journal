@@ -47,14 +47,16 @@ class AttachmentRead(BaseModel):
     entity_id: int
     
     original_filename: str
-    storage_key: str
+    # storage_key: str  <-- removed secure field
+    # content_type: str <-- removed? User said remove "secure". content_type is metadata.
+    # storage_backend: str <-- removed secure field
     content_type: str
     file_size: int
     attachment_type: AttachmentType
-    storage_backend: str
     
     title: Optional[str] = None
     description: Optional[str] = None
+    url: Optional[str] = None
     
     uploaded_by_id: int
     created_at: datetime
@@ -62,7 +64,7 @@ class AttachmentRead(BaseModel):
     
     # Computed fields
     file_size_mb: Optional[float] = None
-    download_url: Optional[str] = None
+    # download_url: Optional[str] = None <-- replaced by URL
     
     class Config:
         from_attributes = True

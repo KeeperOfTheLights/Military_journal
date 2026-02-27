@@ -6,10 +6,10 @@ from typing import List, TYPE_CHECKING
 from src.database import Base
 
 if TYPE_CHECKING:
-    from models.students import Student
-    from models.schedule import Schedule
-    from models.assignments import Assignment
-    from models.assessment_events import AssessmentEvent
+    from src.models.students import Student
+    from src.models.schedule import Schedule
+    from src.models.assignments import Assignment
+    from src.models.assessment_events import AssessmentEvent
 
 
 class Group(Base):

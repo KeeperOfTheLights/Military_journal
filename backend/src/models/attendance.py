@@ -7,8 +7,8 @@ from typing import Optional, TYPE_CHECKING
 from src.database import Base
 
 if TYPE_CHECKING:
-    from models.students import Student
-    from models.schedule import Schedule
+    from src.models.students import Student
+    from src.models.schedule import Schedule
 
 
 class AttendanceStatus(str, PyEnum):
